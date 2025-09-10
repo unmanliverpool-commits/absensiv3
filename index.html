@@ -1,0 +1,3402 @@
+<!DOCTYPE html>
+<!DOCTYPE html>  
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ABSEN DIGITAL</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap');
+        
+        * {
+            font-family: 'Poppins', sans-serif;
+        }
+        
+        body {
+            background: #40E0D0; /* Hijau Toska untuk background utama */
+            min-height: 100vh;
+        }
+
+        /* Splash screen */
+        #splash {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: #40E0D0; /* Hijau Toska */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 99999;
+            flex-direction: column;
+            color: white;
+            font-weight: 700;
+            font-size: 24px;
+            transition: opacity 0.8s ease, visibility 0.8s ease;
+        }
+        #splash.fade-out {
+            opacity: 0;
+            visibility: hidden;
+        }
+        .spinner {
+            margin-top: 20px;
+            width: 50px;
+            height: 50px;
+            border: 5px solid rgba(255,255,255,0.3);
+            border-top: 5px solid #fff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Teks putih solid */
+        .white-text {
+            color: #ffffff;
+            text-align: center;
+            font-size: 26px;
+            font-weight: 800;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Splash / Loading Screen -->
+    <div id="splash">
+        <img src="img/logo.png" 
+             alt="Logo Sekolah" 
+             style="width:150px; height:auto; margin-bottom:15px;">
+        <div class="white-text">
+            ABSEN SISWA <br> DIGITAL BY unman
+        </div>
+        <div class="spinner"></div>
+    </div>
+
+    <!-- Konten utama web kamu -->
+    <!-- Semua kode aplikasi absen kamu taruh di sini -->
+    
+    <script>
+      window.addEventListener("load", function() {
+        setTimeout(() => {
+          document.getElementById("splash").classList.add("fade-out");
+        }, 2500); // tampil 2,5 detik lalu hilang
+      });
+    </script>
+</body>
+</html>
+
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ABSEN SISWA</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+    <style>
+        .bg-teal { background-color: #4fd1c7; }
+        .bg-teal-dark { background-color: #38b2ac; }
+        .text-teal { color: #4fd1c7; }
+        .border-teal { border-color: #4fd1c7; }
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 2px;
+        }
+        .calendar-day {
+            aspect-ratio: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+        .holiday-display {
+            background: linear-gradient(135deg, #f8bbd9, #f4a6cd);
+            color: white;
+            text-align: center;
+            padding: 40px 20px;
+            border-radius: 12px;
+            margin: 20px 0;
+        }
+        .sunday-holiday {
+            background: linear-gradient(135deg, #fbbf24, #f59e0b);
+        }
+        .regular-holiday {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+        }
+        
+        /* Autosave Animation Styles */
+        .autosave-pulse {
+            animation: autosavePulse 2s infinite;
+        }
+        
+        @keyframes autosavePulse {
+            0% { 
+                background-color: #10b981; 
+                box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+                transform: scale(1);
+            }
+            25% { 
+                background-color: #059669; 
+                box-shadow: 0 0 0 5px rgba(16, 185, 129, 0.3);
+                transform: scale(1.05);
+            }
+            50% { 
+                background-color: #ef4444; 
+                box-shadow: 0 0 0 8px rgba(239, 68, 68, 0.3);
+                transform: scale(1.1);
+            }
+            75% { 
+                background-color: #dc2626; 
+                box-shadow: 0 0 0 5px rgba(220, 38, 38, 0.3);
+                transform: scale(1.05);
+            }
+            100% { 
+                background-color: #10b981; 
+                box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+                transform: scale(1);
+            }
+        }
+        
+        .autosave-saving {
+            animation: autosaveSaving 1s ease-in-out;
+            background-color: #f59e0b !important;
+        }
+        
+        @keyframes autosaveSaving {
+            0% { 
+                background-color: #f59e0b; 
+                transform: scale(1) rotate(0deg);
+            }
+            25% { 
+                background-color: #d97706; 
+                transform: scale(1.1) rotate(90deg);
+            }
+            50% { 
+                background-color: #b45309; 
+                transform: scale(1.2) rotate(180deg);
+            }
+            75% { 
+                background-color: #d97706; 
+                transform: scale(1.1) rotate(270deg);
+            }
+            100% { 
+                background-color: #10b981; 
+                transform: scale(1) rotate(360deg);
+            }
+        }
+        
+        .autosave-success {
+            animation: autosaveSuccess 0.8s ease-out;
+        }
+        
+        @keyframes autosaveSuccess {
+            0% { 
+                background-color: #10b981; 
+                transform: scale(1);
+            }
+            50% { 
+                background-color: #059669; 
+                transform: scale(1.3);
+                box-shadow: 0 0 20px rgba(16, 185, 129, 0.8);
+            }
+            100% { 
+                background-color: #10b981; 
+                transform: scale(1);
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-100 font-sans">
+    <div class="max-w-md mx-auto bg-white min-h-screen">
+        <!-- Header -->
+        <div class="text-white p-4 text-center relative" style="background-color: #4fd1c7;">
+            <div id="autosaveStatus" class="absolute top-2 right-2 text-xs bg-green-500 text-white px-1.5 py-0.5 rounded-full shadow-sm border border-gray-300 autosave-pulse" style="font-size: 7px;">
+                💾 AUTO
+            </div>
+            <h1 class="text-xl font-bold">ABSEN SISWA</h1>
+            <p class="text-xs opacity-75 mt-1">✨ DIGITAL ✨</p>
+        </div>
+
+        <!-- Info Sekolah -->
+        <div class="p-4 bg-white border-b">
+            <div class="grid grid-cols-2 gap-2 text-sm">
+                <div>
+                    <label class="font-semibold">NAMA SEKOLAH:</label>
+                    <input type="text" id="namaSekolah" class="w-full border rounded px-2 py-1 mt-1" placeholder="Masukkan nama sekolah">
+                </div>
+                <div>
+                    <label class="font-semibold">KELAS:</label>
+                    <input type="text" id="kelas" class="w-full border rounded px-2 py-1 mt-1" placeholder="Masukkan kelas">
+                </div>
+                <div>
+                    <label class="font-semibold">WALI KELAS:</label>
+                    <input type="text" id="waliKelas" class="w-full border rounded px-2 py-1 mt-1" placeholder="Masukkan wali kelas">
+                </div>
+                <div>
+                    <label class="font-semibold">JUMLAH SISWA:</label>
+                    <input type="text" id="jumlahSiswa" class="w-full border rounded px-2 py-1 mt-1 bg-gray-100" readonly value="0 | L : 0 | P : 0">
+                </div>
+            </div>
+        </div>
+
+        <!-- Tanggal dan Jam -->
+        <div class="p-4 bg-gray-50 border-b">
+            <div class="grid grid-cols-3 gap-4 text-center text-sm">
+                <div class="border-r border-gray-300">
+                    <div class="font-semibold">HARI</div>
+                    <div id="hari"></div>
+                </div>
+                <div class="border-r border-gray-300">
+                    <div class="font-semibold">TANGGAL</div>
+                    <div id="tanggal"></div>
+                </div>
+                <div>
+                    <div class="font-semibold">JAM</div>
+                    <div id="jam"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tabs -->
+        <div class="flex bg-white border-b">
+            <button class="tab-btn flex-1 py-3 px-2 text-xs font-semibold text-white" style="background-color: #4fd1c7;" data-tab="data-siswa">DATA SISWA</button>
+            <button class="tab-btn flex-1 py-3 px-2 text-xs font-semibold text-gray-600" data-tab="absen">ABSEN</button>
+            <button class="tab-btn flex-1 py-3 px-2 text-xs font-semibold text-gray-600" data-tab="riwayat">RIWAYAT</button>
+            <button class="tab-btn flex-1 py-3 px-2 text-xs font-semibold text-gray-600" data-tab="rekap">REKAP</button>
+            <button class="tab-btn flex-1 py-3 px-2 text-xs font-semibold text-gray-600" data-tab="unduh">UNDUH</button>
+        </div>
+
+        <!-- Tab Content -->
+        <div class="p-4">
+            <!-- Tab Data Siswa -->
+            <div id="tab-data-siswa" class="tab-content">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-lg font-bold">DATA SISWA</h2>
+                    <div class="flex gap-2">
+                        <button id="uploadSiswa" class="bg-blue-500 text-white px-3 py-2 rounded text-sm font-semibold">UPLOAD FILE</button>
+                        <button id="tambahSiswa" class="text-white px-4 py-2 rounded text-sm font-semibold" style="background-color: #4fd1c7;">TAMBAH SISWA</button>
+                    </div>
+                </div>
+                
+                <!-- Upload Instructions -->
+                <div id="uploadInstructions" class="mb-4 p-3 bg-blue-50 border border-blue-200 rounded hidden">
+                    <h4 class="font-semibold text-blue-800 mb-2">📋 FORMAT FILE UPLOAD:</h4>
+                    <p class="text-sm text-blue-700 mb-2">File CSV/Excel dengan kolom:</p>
+                    <div class="text-xs text-blue-600 bg-white p-2 rounded border">
+                        <div><strong>Kolom 1:</strong> NAMA (contoh: Ahmad Budi)</div>
+                        <div><strong>Kolom 2:</strong> NIS (contoh: 12345)</div>
+                        <div><strong>Kolom 3:</strong> JENIS_KELAMIN (L/P atau LAKI-LAKI/PEREMPUAN)</div>
+                    </div>
+                    <p class="text-xs text-blue-600 mt-2">💡 Baris pertama bisa berisi header atau langsung data</p>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full border border-gray-300 text-sm">
+                        <thead class="bg-gray-100">
+                            <tr>
+                                <th class="border border-gray-300 px-2 py-2">NO</th>
+                                <th class="border border-gray-300 px-2 py-2">NAMA</th>
+                                <th class="border border-gray-300 px-2 py-2">NIS</th>
+                                <th class="border border-gray-300 px-2 py-2">JENIS KELAMIN</th>
+                                <th class="border border-gray-300 px-2 py-2">AKSI</th>
+                            </tr>
+                        </thead>
+                        <tbody id="dataSiswaTable">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Tab Absen -->
+            <div id="tab-absen" class="tab-content hidden">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-lg font-bold">ABSEN HARIAN</h2>
+                    <div class="flex gap-2">
+                        <button id="pilihTanggal" class="bg-blue-500 text-white px-3 py-2 rounded text-sm">PILIH TANGGAL</button>
+                        <button id="toggleLibur" class="bg-red-500 text-white px-3 py-2 rounded text-sm">LIBUR</button>
+                        <button id="hadirSemua" class="bg-green-500 text-white px-3 py-2 rounded text-sm">HADIR SEMUA</button>
+                    </div>
+                </div>
+                
+                <div class="mb-4 text-center">
+                    <div class="font-semibold text-lg" id="tanggalAbsen"></div>
+                </div>
+
+                <div id="absenContent">
+                    <div class="overflow-x-auto">
+                        <table class="w-full border border-gray-300 text-sm">
+                            <thead class="bg-gray-100">
+                                <tr>
+                                    <th class="border border-gray-300 px-2 py-2">NO</th>
+                                    <th class="border border-gray-300 px-2 py-2">NAMA SISWA</th>
+                                    <th class="border border-gray-300 px-2 py-2">ABSEN</th>
+                                </tr>
+                            </thead>
+                            <tbody id="absenTable">
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <div class="flex gap-2 mt-4">
+                        <button id="simpanAbsen" class="text-white px-4 py-2 rounded font-semibold" style="background-color: #4fd1c7;">SIMPAN ABSEN</button>
+                        <button id="editAbsen" class="bg-yellow-500 text-white px-4 py-2 rounded font-semibold hidden">EDIT ABSEN</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab Riwayat -->
+            <div id="tab-riwayat" class="tab-content hidden">
+                <h2 class="text-lg font-bold mb-4">📊 RIWAYAT ABSEN</h2>
+                <div class="flex gap-2 mb-4">
+                    <select id="bulanRiwayat" class="border rounded px-2 py-1">
+                        <option value="1">Januari</option>
+                        <option value="2">Februari</option>
+                        <option value="3">Maret</option>
+                        <option value="4">April</option>
+                        <option value="5">Mei</option>
+                        <option value="6">Juni</option>
+                        <option value="7">Juli</option>
+                        <option value="8">Agustus</option>
+                        <option value="9">September</option>
+                        <option value="10">Oktober</option>
+                        <option value="11">November</option>
+                        <option value="12">Desember</option>
+                    </select>
+                    <select id="tahunRiwayat" class="border rounded px-2 py-1">
+                        <option value="2025">2025</option>
+                        <option value="2026">2026</option>
+                        <option value="2027">2027</option>
+                        <option value="2028">2028</option>
+                        <option value="2029">2029</option>
+                        <option value="2030">2030</option>
+                    </select>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full border border-gray-300 text-xs" id="riwayatTable">
+                    </table>
+                </div>
+                
+                <!-- Keterangan -->
+                <div class="mt-4 p-4 bg-gray-50 rounded-lg">
+                    <h4 class="font-semibold text-sm mb-3">📋 KETERANGAN SIMBOL:</h4>
+                    <div class="grid grid-cols-2 gap-2 text-xs">
+                        <div class="flex items-center gap-2">
+                            <span class="w-6 h-6 bg-green-200 border border-gray-300 rounded flex items-center justify-center font-semibold">H</span>
+                            <span>HADIR</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="w-6 h-6 bg-blue-200 border border-gray-300 rounded flex items-center justify-center font-semibold">S</span>
+                            <span>SAKIT</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="w-6 h-6 bg-yellow-200 border border-gray-300 rounded flex items-center justify-center font-semibold">I</span>
+                            <span>IZIN</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="w-6 h-6 bg-red-200 border border-gray-300 rounded flex items-center justify-center font-semibold">A</span>
+                            <span>ALPA</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="w-6 h-6 bg-purple-200 border border-gray-300 rounded flex items-center justify-center font-semibold">M</span>
+                            <span>MINGGU</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="w-6 h-6 bg-orange-200 border border-gray-300 rounded flex items-center justify-center font-semibold">L</span>
+                            <span>LIBUR</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab Rekap -->
+            <div id="tab-rekap" class="tab-content hidden">
+                <h2 class="text-lg font-bold mb-4">📈 REKAP ABSEN</h2>
+                <div class="flex gap-2 mb-4">
+                    <select id="bulanRekap" class="border rounded px-2 py-1">
+                        <option value="all">SEMUA DATA</option>
+                        <option value="1">Januari</option>
+                        <option value="2">Februari</option>
+                        <option value="3">Maret</option>
+                        <option value="4">April</option>
+                        <option value="5">Mei</option>
+                        <option value="6">Juni</option>
+                        <option value="7">Juli</option>
+                        <option value="8">Agustus</option>
+                        <option value="9">September</option>
+                        <option value="10">Oktober</option>
+                        <option value="11">November</option>
+                        <option value="12">Desember</option>
+                    </select>
+                    <select id="tahunRekap" class="border rounded px-2 py-1">
+                        <option value="all">SEMUA DATA</option>
+                        <option value="2025">2025</option>
+                        <option value="2026">2026</option>
+                        <option value="2027">2027</option>
+                        <option value="2028">2028</option>
+                        <option value="2029">2029</option>
+                        <option value="2030">2030</option>
+                    </select>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full border border-gray-300 text-sm" id="rekapTable">
+                        <thead class="bg-gray-100">
+                            <tr>
+                                <th class="border border-gray-300 px-2 py-2">🔢 NO</th>
+                                <th class="border border-gray-300 px-2 py-2">👤 NAMA</th>
+                                <th class="border border-gray-300 px-2 py-2">✅ HADIR</th>
+                                <th class="border border-gray-300 px-2 py-2">🤒 SAKIT</th>
+                                <th class="border border-gray-300 px-2 py-2">📝 IZIN</th>
+                                <th class="border border-gray-300 px-2 py-2">❌ ALPA</th>
+                                <th class="border border-gray-300 px-2 py-2" style="background-color: #4fd1c7; color: white;">📊 PERSENTASE</th>
+                            </tr>
+                        </thead>
+                        <tbody id="rekapTableBody">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Tab Unduh -->
+            <div id="tab-unduh" class="tab-content hidden">
+                <h2 class="text-lg font-bold mb-4">📥 UNDUH / CETAK</h2>
+                
+                <div class="grid grid-cols-1 gap-4">
+                    <!-- Kolom Unduh Riwayat -->
+                    <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                        <h3 class="text-lg font-semibold text-blue-800 mb-3">📊 UNDUH RIWAYAT</h3>
+                        <p class="text-sm text-blue-600 mb-2">Unduh data riwayat absen siswa dalam format Excel</p>
+                        <p class="text-xs text-blue-500 mb-4">📁 File akan tersimpan di folder <strong>ABSEN</strong> di HP Android</p>
+                        
+                        <div class="flex gap-2 mb-3">
+                            <select id="bulanUnduhRiwayat" class="border rounded px-2 py-1 text-sm">
+                                <option value="all">SEMUA DATA</option>
+                                <option value="1">Januari</option>
+                                <option value="2">Februari</option>
+                                <option value="3">Maret</option>
+                                <option value="4">April</option>
+                                <option value="5">Mei</option>
+                                <option value="6">Juni</option>
+                                <option value="7">Juli</option>
+                                <option value="8">Agustus</option>
+                                <option value="9">September</option>
+                                <option value="10">Oktober</option>
+                                <option value="11">November</option>
+                                <option value="12">Desember</option>
+                            </select>
+                            <select id="tahunUnduhRiwayat" class="border rounded px-2 py-1 text-sm">
+                                <option value="all">SEMUA DATA</option>
+                                <option value="2025">2025</option>
+                                <option value="2026">2026</option>
+                                <option value="2027">2027</option>
+                                <option value="2028">2028</option>
+                                <option value="2029">2029</option>
+                                <option value="2030">2030</option>
+                            </select>
+                        </div>
+                        
+                        <div class="flex gap-2">
+                            <button id="unduhRiwayatExcel" class="flex-1 bg-blue-500 text-white px-3 py-2 rounded font-semibold text-sm">
+                                📊 EXCEL (.xlsx)
+                            </button>
+                            <button id="unduhRiwayatPDF" class="flex-1 bg-red-500 text-white px-3 py-2 rounded font-semibold text-sm">
+                                📄 PDF
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Kolom Unduh Rekap -->
+                    <div class="bg-green-50 border border-green-200 rounded-lg p-4">
+                        <h3 class="text-lg font-semibold text-green-800 mb-3">📈 UNDUH REKAP</h3>
+                        <p class="text-sm text-green-600 mb-2">Unduh rekap statistik kehadiran siswa dalam format Excel</p>
+                        <p class="text-xs text-green-500 mb-4">📁 File akan tersimpan di folder <strong>ABSEN</strong> di HP Android</p>
+                        
+                        <div class="flex gap-2 mb-3">
+                            <select id="bulanUnduhRekap" class="border rounded px-2 py-1 text-sm">
+                                <option value="all">SEMUA DATA</option>
+                                <option value="1">Januari</option>
+                                <option value="2">Februari</option>
+                                <option value="3">Maret</option>
+                                <option value="4">April</option>
+                                <option value="5">Mei</option>
+                                <option value="6">Juni</option>
+                                <option value="7">Juli</option>
+                                <option value="8">Agustus</option>
+                                <option value="9">September</option>
+                                <option value="10">Oktober</option>
+                                <option value="11">November</option>
+                                <option value="12">Desember</option>
+                            </select>
+                            <select id="tahunUnduhRekap" class="border rounded px-2 py-1 text-sm">
+                                <option value="all">SEMUA DATA</option>
+                                <option value="2025">2025</option>
+                                <option value="2026">2026</option>
+                                <option value="2027">2027</option>
+                                <option value="2028">2028</option>
+                                <option value="2029">2029</option>
+                                <option value="2030">2030</option>
+                            </select>
+                        </div>
+                        
+                        <div class="flex gap-2">
+                            <button id="unduhRekapExcel" class="flex-1 bg-green-500 text-white px-3 py-2 rounded font-semibold text-sm">
+                                📊 EXCEL (.xlsx)
+                            </button>
+                            <button id="unduhRekapPDF" class="flex-1 bg-red-500 text-white px-3 py-2 rounded font-semibold text-sm">
+                                📄 PDF
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Kolom Kirim -->
+                    <div class="bg-purple-50 border border-purple-200 rounded-lg p-4">
+                        <h3 class="text-lg font-semibold text-purple-800 mb-3">📧 KIRIM</h3>
+                        <p class="text-sm text-purple-600 mb-4">Kirim laporan absen melalui email atau WhatsApp</p>
+                        
+                        <div class="space-y-3">
+                            <div class="flex gap-2">
+                                <select id="bulanKirim" class="border rounded px-2 py-1 text-sm flex-1">
+                                    <option value="all">SEMUA DATA</option>
+                                    <option value="1">Januari</option>
+                                    <option value="2">Februari</option>
+                                    <option value="3">Maret</option>
+                                    <option value="4">April</option>
+                                    <option value="5">Mei</option>
+                                    <option value="6">Juni</option>
+                                    <option value="7">Juli</option>
+                                    <option value="8">Agustus</option>
+                                    <option value="9">September</option>
+                                    <option value="10">Oktober</option>
+                                    <option value="11">November</option>
+                                    <option value="12">Desember</option>
+                                </select>
+                                <select id="tahunKirim" class="border rounded px-2 py-1 text-sm flex-1">
+                                    <option value="all">SEMUA DATA</option>
+                                    <option value="2025">2025</option>
+                                    <option value="2026">2026</option>
+                                    <option value="2027">2027</option>
+                                    <option value="2028">2028</option>
+                                    <option value="2029">2029</option>
+                                    <option value="2030">2030</option>
+                                </select>
+                            </div>
+                            
+                            <div class="flex gap-2">
+                                <button id="kirimEmail" class="flex-1 bg-purple-500 text-white px-4 py-2 rounded font-semibold text-sm">
+                                    📧 KIRIM EMAIL
+                                </button>
+                                <button id="kirimWA" class="flex-1 bg-green-600 text-white px-4 py-2 rounded font-semibold text-sm">
+                                    📱 KIRIM WA
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Modal Tambah/Edit Siswa -->
+    <div id="modalSiswa" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50">
+        <div class="flex items-center justify-center min-h-screen p-4">
+            <div class="bg-white rounded-lg p-6 w-full max-w-sm">
+                <h3 class="text-lg font-bold mb-4" id="modalTitle">➕ TAMBAH SISWA BARU</h3>
+                <div class="space-y-4">
+                    <div>
+                        <label class="block font-semibold mb-1">👤 NAMA SISWA</label>
+                        <input type="text" id="namaSiswa" class="w-full border rounded px-3 py-2">
+                    </div>
+                    <div>
+                        <label class="block font-semibold mb-1">🆔 NIS</label>
+                        <input type="number" id="nisSiswa" class="w-full border rounded px-3 py-2">
+                    </div>
+                    <div>
+                        <label class="block font-semibold mb-2">⚧ JENIS KELAMIN</label>
+                        <div class="flex gap-2">
+                            <button type="button" id="lakiLaki" class="flex-1 py-2 px-4 border rounded bg-gray-100">LAKI-LAKI</button>
+                            <button type="button" id="perempuan" class="flex-1 py-2 px-4 border rounded bg-gray-100">PEREMPUAN</button>
+                        </div>
+                    </div>
+                    <div id="editNote" class="text-red-600 text-sm hidden">
+                        * CATATAN: Hapus nama di kolom nama siswa untuk menghapus data siswa
+                    </div>
+                </div>
+                <div class="flex gap-2 mt-6">
+                    <button id="kembali" class="flex-1 bg-gray-500 text-white py-2 rounded">🔙 KEMBALI</button>
+                    <button id="simpanSiswa" class="flex-1 text-white py-2 rounded" style="background-color: #4fd1c7;">💾 SIMPAN</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Upload File -->
+    <div id="modalUpload" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50">
+        <div class="flex items-center justify-center min-h-screen p-4">
+            <div class="bg-white rounded-lg p-3 w-full max-w-xs">
+                <h3 class="text-base font-bold mb-2">📁 UPLOAD DATA SISWA</h3>
+                
+                <div class="mb-2 p-2 bg-yellow-50 border border-yellow-200 rounded">
+                    <h4 class="font-semibold text-yellow-800 mb-1 text-xs">⚠️ PERHATIAN:</h4>
+                    <ul class="text-xs text-yellow-700 space-y-0.5">
+                        <li>• File Excel (.xlsx)</li>
+                        <li>• Pilih mode upload</li>
+                    </ul>
+                </div>
+                
+                <div class="mb-2">
+                    <label class="block font-semibold mb-1 text-xs">MODE:</label>
+                    <div class="space-y-1">
+                        <label class="flex items-center">
+                            <input type="radio" name="uploadMode" value="add" checked class="mr-1">
+                            <span class="text-xs">TAMBAH ke data lama</span>
+                        </label>
+                        <label class="flex items-center">
+                            <input type="radio" name="uploadMode" value="replace" class="mr-1">
+                            <span class="text-xs">GANTI semua data</span>
+                        </label>
+                    </div>
+                </div>
+                
+                <div class="mb-3">
+                    <label class="block font-semibold mb-1 text-xs">FILE:</label>
+                    <input type="file" id="fileInput" accept=".xlsx" class="w-full border rounded px-2 py-1 text-xs">
+                </div>
+                
+                <div class="flex gap-2">
+                    <button id="batalUpload" class="flex-1 bg-gray-500 text-white py-1.5 rounded text-xs">❌ BATAL</button>
+                    <button id="prosesUpload" class="flex-1 text-white py-1.5 rounded text-xs" style="background-color: #4fd1c7;" disabled>📤 UPLOAD</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Kalender -->
+    <div id="modalKalender" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50">
+        <div class="flex items-center justify-center min-h-screen p-4">
+            <div class="bg-white rounded-lg p-6 w-full max-w-sm">
+                <h3 class="text-lg font-bold mb-4">PILIH TANGGAL</h3>
+                <div class="mb-4">
+                    <div class="flex justify-between items-center mb-2">
+                        <button id="prevMonth" class="px-3 py-1 bg-gray-200 rounded">&lt;</button>
+                        <span id="currentMonth" class="font-semibold"></span>
+                        <button id="nextMonth" class="px-3 py-1 bg-gray-200 rounded">&gt;</button>
+                    </div>
+                    <div class="calendar-grid text-center text-sm">
+                        <div class="font-semibold py-2">MIN</div>
+                        <div class="font-semibold py-2">SEN</div>
+                        <div class="font-semibold py-2">SEL</div>
+                        <div class="font-semibold py-2">RAB</div>
+                        <div class="font-semibold py-2">KAM</div>
+                        <div class="font-semibold py-2">JUM</div>
+                        <div class="font-semibold py-2">SAB</div>
+                    </div>
+                    <div id="calendarDays" class="calendar-grid text-sm"></div>
+                </div>
+                <div class="flex gap-2">
+                    <button id="tutupKalender" class="flex-1 bg-gray-500 text-white py-2 rounded">TUTUP</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Data storage
+        let students = [];
+        let attendance = {};
+        let holidays = new Set();
+        let currentDate = new Date();
+        let selectedDate = new Date();
+        let editingStudent = null;
+        let selectedGender = '';
+        let calendarDate = new Date();
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            updateDateTime();
+            setInterval(updateDateTime, 1000);
+            loadData();
+            showTab('data-siswa');
+            updateAbsenDate();
+            
+            // Set default month and year
+            const now = new Date();
+            document.getElementById('bulanRiwayat').value = now.getMonth() + 1;
+            document.getElementById('tahunRiwayat').value = now.getFullYear();
+            document.getElementById('tahunRekap').value = now.getFullYear();
+            document.getElementById('bulanUnduhRiwayat').value = now.getMonth() + 1;
+            document.getElementById('tahunUnduhRiwayat').value = now.getFullYear();
+            document.getElementById('tahunUnduhRekap').value = now.getFullYear();
+            document.getElementById('bulanKirim').value = now.getMonth() + 1;
+            document.getElementById('tahunKirim').value = now.getFullYear();
+            
+            // Add download functionality
+            setupDownloadFunctionality();
+            
+            // Setup autosave functionality
+            setupAutoSave();
+        });
+
+        // Update date and time
+        function updateDateTime() {
+            const now = new Date();
+            const days = ['MINGGU', 'SENIN', 'SELASA', 'RABU', 'KAMIS', 'JUMAT', 'SABTU'];
+            
+            document.getElementById('hari').textContent = days[now.getDay()];
+            document.getElementById('tanggal').textContent = now.toLocaleDateString('id-ID');
+            document.getElementById('jam').textContent = now.toLocaleTimeString('id-ID');
+        }
+
+        // Tab functionality
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const tabName = btn.dataset.tab;
+                showTab(tabName);
+            });
+        });
+
+        function showTab(tabName) {
+            // Hide all tabs
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.add('hidden');
+            });
+            
+            // Show selected tab
+            document.getElementById(`tab-${tabName}`).classList.remove('hidden');
+            
+            // Update tab buttons
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('text-white');
+                btn.classList.add('text-gray-600');
+                btn.style.backgroundColor = '';
+            });
+            
+            const activeTab = document.querySelector(`[data-tab="${tabName}"]`);
+            activeTab.classList.add('text-white');
+            activeTab.classList.remove('text-gray-600');
+            activeTab.style.backgroundColor = '#4fd1c7';
+            
+            // Refresh content based on tab
+            if (tabName === 'data-siswa') {
+                renderStudentTable();
+            } else if (tabName === 'absen') {
+                renderAbsenTable();
+            } else if (tabName === 'riwayat') {
+                const bulan = parseInt(document.getElementById('bulanRiwayat').value);
+                const tahun = parseInt(document.getElementById('tahunRiwayat').value);
+                renderRiwayatTable(bulan, tahun);
+            } else if (tabName === 'rekap') {
+                const bulan = document.getElementById('bulanRekap').value;
+                const tahun = document.getElementById('tahunRekap').value;
+                renderRekapTable(bulan, tahun);
+            }
+        }
+
+        // Student management
+        document.getElementById('tambahSiswa').addEventListener('click', () => {
+            openStudentModal();
+        });
+
+        // Upload functionality
+        document.getElementById('uploadSiswa').addEventListener('click', () => {
+            document.getElementById('uploadInstructions').classList.toggle('hidden');
+            document.getElementById('modalUpload').classList.remove('hidden');
+        });
+
+        document.getElementById('batalUpload').addEventListener('click', () => {
+            document.getElementById('modalUpload').classList.add('hidden');
+            document.getElementById('fileInput').value = '';
+            document.getElementById('prosesUpload').disabled = true;
+        });
+
+        document.getElementById('fileInput').addEventListener('change', handleFileSelect);
+        document.getElementById('prosesUpload').addEventListener('click', processUpload);
+
+        function openStudentModal(student = null) {
+            editingStudent = student;
+            const modal = document.getElementById('modalSiswa');
+            const title = document.getElementById('modalTitle');
+            const nameInput = document.getElementById('namaSiswa');
+            const nisInput = document.getElementById('nisSiswa');
+            const editNote = document.getElementById('editNote');
+            
+            if (student) {
+                title.textContent = 'EDIT DATA SISWA';
+                nameInput.value = student.nama;
+                nisInput.value = student.nis;
+                selectedGender = student.jenisKelamin;
+                editNote.classList.remove('hidden');
+            } else {
+                title.textContent = 'TAMBAH SISWA BARU';
+                nameInput.value = '';
+                nisInput.value = '';
+                selectedGender = '';
+                editNote.classList.add('hidden');
+            }
+            
+            updateGenderButtons();
+            modal.classList.remove('hidden');
+        }
+
+        // Gender selection
+        document.getElementById('lakiLaki').addEventListener('click', () => {
+            selectedGender = 'LAKI-LAKI';
+            updateGenderButtons();
+        });
+
+        document.getElementById('perempuan').addEventListener('click', () => {
+            selectedGender = 'PEREMPUAN';
+            updateGenderButtons();
+        });
+
+        function updateGenderButtons() {
+            const lakiBtn = document.getElementById('lakiLaki');
+            const perempuanBtn = document.getElementById('perempuan');
+            
+            lakiBtn.classList.remove('bg-blue-500', 'text-white');
+            perempuanBtn.classList.remove('bg-pink-500', 'text-white');
+            lakiBtn.classList.add('bg-gray-100');
+            perempuanBtn.classList.add('bg-gray-100');
+            
+            if (selectedGender === 'LAKI-LAKI') {
+                lakiBtn.classList.remove('bg-gray-100');
+                lakiBtn.classList.add('bg-blue-500', 'text-white');
+            } else if (selectedGender === 'PEREMPUAN') {
+                perempuanBtn.classList.remove('bg-gray-100');
+                perempuanBtn.classList.add('bg-pink-500', 'text-white');
+            }
+        }
+
+        // Save student
+        document.getElementById('simpanSiswa').addEventListener('click', () => {
+            const nama = document.getElementById('namaSiswa').value.trim();
+            const nis = document.getElementById('nisSiswa').value.trim();
+            
+            if (!nama || !nis || !selectedGender) {
+                alert('Mohon lengkapi semua data!');
+                return;
+            }
+
+            // Check for duplicates (except when editing the same student)
+            const isDuplicate = students.some(student => 
+                (student.nama.toLowerCase() === nama.toLowerCase() || student.nis === nis) &&
+                (!editingStudent || student.id !== editingStudent.id)
+            );
+
+            if (isDuplicate) {
+                alert('Nama atau NIS sudah ada! Mohon gunakan data yang berbeda.');
+                return;
+            }
+            
+            if (editingStudent) {
+                // Check if name is being deleted (for deletion functionality)
+                if (!nama) {
+                    students = students.filter(s => s.id !== editingStudent.id);
+                } else {
+                    editingStudent.nama = nama;
+                    editingStudent.nis = nis;
+                    editingStudent.jenisKelamin = selectedGender;
+                }
+            } else {
+                const newStudent = {
+                    id: Date.now(),
+                    nama: nama,
+                    nis: nis,
+                    jenisKelamin: selectedGender
+                };
+                students.push(newStudent);
+            }
+            
+            // Sort students alphabetically
+            students.sort((a, b) => a.nama.localeCompare(b.nama));
+            
+            saveData();
+            updateStudentCount();
+            renderStudentTable();
+            closeModal();
+        });
+
+        // Close modal
+        document.getElementById('kembali').addEventListener('click', closeModal);
+
+        function closeModal() {
+            document.getElementById('modalSiswa').classList.add('hidden');
+            editingStudent = null;
+            selectedGender = '';
+        }
+
+        // Render student table
+        function renderStudentTable() {
+            const tbody = document.getElementById('dataSiswaTable');
+            tbody.innerHTML = '';
+            
+            students.forEach((student, index) => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td class="border border-gray-300 px-2 py-2 text-center">${index + 1}</td>
+                    <td class="border border-gray-300 px-2 py-2">${student.nama}</td>
+                    <td class="border border-gray-300 px-2 py-2 text-center">${student.nis}</td>
+                    <td class="border border-gray-300 px-2 py-2 text-center">${student.jenisKelamin}</td>
+                    <td class="border border-gray-300 px-2 py-2 text-center">
+                        <button onclick="openStudentModal(students[${students.indexOf(student)}])" class="bg-yellow-500 text-white px-2 py-1 rounded text-xs">EDIT</button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        // Update student count
+        function updateStudentCount() {
+            const totalStudents = students.length;
+            const maleCount = students.filter(student => student.jenisKelamin === 'LAKI-LAKI').length;
+            const femaleCount = students.filter(student => student.jenisKelamin === 'PEREMPUAN').length;
+            
+            document.getElementById('jumlahSiswa').value = `${totalStudents} | L : ${maleCount} | P : ${femaleCount}`;
+        }
+
+        // Calendar functionality
+        document.getElementById('pilihTanggal').addEventListener('click', () => {
+            calendarDate = new Date(selectedDate);
+            updateCalendar();
+            document.getElementById('modalKalender').classList.remove('hidden');
+        });
+
+        document.getElementById('tutupKalender').addEventListener('click', () => {
+            document.getElementById('modalKalender').classList.add('hidden');
+        });
+
+        document.getElementById('prevMonth').addEventListener('click', () => {
+            calendarDate.setMonth(calendarDate.getMonth() - 1);
+            updateCalendar();
+        });
+
+        document.getElementById('nextMonth').addEventListener('click', () => {
+            calendarDate.setMonth(calendarDate.getMonth() + 1);
+            updateCalendar();
+        });
+
+        function updateCalendar() {
+            const monthNames = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+                              'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+            
+            document.getElementById('currentMonth').textContent = 
+                `${monthNames[calendarDate.getMonth()]} ${calendarDate.getFullYear()}`;
+            
+            const firstDay = new Date(calendarDate.getFullYear(), calendarDate.getMonth(), 1);
+            const lastDay = new Date(calendarDate.getFullYear(), calendarDate.getMonth() + 1, 0);
+            const startDate = new Date(firstDay);
+            startDate.setDate(startDate.getDate() - firstDay.getDay());
+            
+            const calendarDays = document.getElementById('calendarDays');
+            calendarDays.innerHTML = '';
+            
+            for (let i = 0; i < 42; i++) {
+                const date = new Date(startDate);
+                date.setDate(startDate.getDate() + i);
+                
+                const dayElement = document.createElement('div');
+                dayElement.className = 'calendar-day';
+                dayElement.textContent = date.getDate();
+                
+                const dateStr = date.toDateString();
+                const isCurrentMonth = date.getMonth() === calendarDate.getMonth();
+                const isSunday = date.getDay() === 0;
+                const isHoliday = holidays.has(dateStr);
+                const isSelected = date.toDateString() === selectedDate.toDateString();
+                
+                if (!isCurrentMonth) {
+                    dayElement.classList.add('text-gray-300');
+                } else if (isSelected) {
+                    dayElement.style.backgroundColor = '#f8bbd9';
+                    dayElement.classList.add('text-white');
+                } else if (isSunday || isHoliday) {
+                    dayElement.classList.add('bg-red-200', 'text-red-800');
+                } else {
+                    dayElement.classList.add('hover:bg-gray-200');
+                }
+                
+                if (isCurrentMonth) {
+                    dayElement.addEventListener('click', () => {
+                        selectedDate = new Date(date);
+                        updateAbsenDate();
+                        renderAbsenTable();
+                        document.getElementById('modalKalender').classList.add('hidden');
+                    });
+                }
+                
+                calendarDays.appendChild(dayElement);
+            }
+        }
+
+        // Holiday functionality
+        document.getElementById('toggleLibur').addEventListener('click', (e) => {
+            if (e.target.disabled) return;
+            
+            const dateStr = selectedDate.toDateString();
+            const currentAttendance = attendance[dateStr] || {};
+            const isLocked = currentAttendance.locked || false;
+            
+            if (isLocked) return;
+            
+            const btn = document.getElementById('toggleLibur');
+            
+            if (holidays.has(dateStr)) {
+                holidays.delete(dateStr);
+                btn.textContent = 'LIBUR';
+                btn.classList.remove('bg-green-500');
+                btn.classList.add('bg-red-500');
+            } else {
+                holidays.add(dateStr);
+                btn.textContent = 'BATAL LIBUR';
+                btn.classList.remove('bg-red-500');
+                btn.classList.add('bg-green-500');
+            }
+            
+            renderAbsenTable();
+            saveData();
+        });
+
+        // Update absen date display
+        function updateAbsenDate() {
+            const options = { 
+                weekday: 'long', 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric' 
+            };
+            document.getElementById('tanggalAbsen').textContent = 
+                selectedDate.toLocaleDateString('id-ID', options).toUpperCase();
+            
+            // Update holiday button
+            const dateStr = selectedDate.toDateString();
+            const btn = document.getElementById('toggleLibur');
+            
+            if (holidays.has(dateStr)) {
+                btn.textContent = 'BATAL LIBUR';
+                btn.classList.remove('bg-red-500');
+                btn.classList.add('bg-green-500');
+            } else {
+                btn.textContent = 'LIBUR';
+                btn.classList.remove('bg-green-500');
+                btn.classList.add('bg-red-500');
+            }
+        }
+
+        // Attendance functionality
+        function renderAbsenTable() {
+            const dateStr = selectedDate.toDateString();
+            const isSunday = selectedDate.getDay() === 0;
+            const isHoliday = holidays.has(dateStr);
+            const absenContent = document.getElementById('absenContent');
+            
+            if (isSunday || isHoliday) {
+                const holidayType = isSunday ? 'sunday-holiday' : 'regular-holiday';
+                const holidayText = isSunday ? '🌅 HARI MINGGU - LIBUR' : '🏖️ HARI LIBUR';
+                
+                absenContent.innerHTML = `
+                    <div class="holiday-display ${holidayType}">
+                        <h3 class="text-2xl font-bold mb-2">${holidayText}</h3>
+                        <p class="text-lg">Tidak ada kegiatan belajar mengajar</p>
+                        <div class="mt-4 text-6xl">🎉</div>
+                    </div>
+                `;
+                return;
+            }
+            
+            // Restore normal table view
+            absenContent.innerHTML = `
+                <div class="overflow-x-auto">
+                    <table class="w-full border border-gray-300 text-sm">
+                        <thead class="bg-gray-100">
+                            <tr>
+                                <th class="border border-gray-300 px-2 py-2">NO</th>
+                                <th class="border border-gray-300 px-2 py-2">NAMA SISWA</th>
+                                <th class="border border-gray-300 px-2 py-2">ABSEN</th>
+                            </tr>
+                        </thead>
+                        <tbody id="absenTable">
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div class="flex gap-2 mt-4">
+                    <button id="simpanAbsen" class="bg-teal text-white px-4 py-2 rounded font-semibold">SIMPAN ABSEN</button>
+                    <button id="editAbsen" class="bg-yellow-500 text-white px-4 py-2 rounded font-semibold hidden">EDIT ABSEN</button>
+                </div>
+            `;
+            
+            const tbody = document.getElementById('absenTable');
+            tbody.innerHTML = '';
+            
+            const currentAttendance = attendance[dateStr] || {};
+            const isLocked = currentAttendance.locked || false;
+            
+            students.forEach((student, index) => {
+                const studentAttendance = currentAttendance[student.id] || '';
+                
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td class="border border-gray-300 px-2 py-2 text-center">${index + 1}</td>
+                    <td class="border border-gray-300 px-2 py-2">${student.nama}</td>
+                    <td class="border border-gray-300 px-2 py-2 text-center">
+                        <div class="flex gap-1 justify-center">
+                            <button class="attendance-btn px-2 py-1 rounded text-xs ${studentAttendance === 'HADIR' ? 'bg-green-500 text-white' : 'bg-white border'}" 
+                                    data-student="${student.id}" data-status="HADIR" ${isLocked ? 'disabled' : ''}>HADIR</button>
+                            <button class="attendance-btn px-2 py-1 rounded text-xs ${studentAttendance === 'SAKIT' ? 'bg-blue-500 text-white' : 'bg-white border'}" 
+                                    data-student="${student.id}" data-status="SAKIT" ${isLocked ? 'disabled' : ''}>SAKIT</button>
+                            <button class="attendance-btn px-2 py-1 rounded text-xs ${studentAttendance === 'IZIN' ? 'bg-yellow-500 text-white' : 'bg-white border'}" 
+                                    data-student="${student.id}" data-status="IZIN" ${isLocked ? 'disabled' : ''}>IZIN</button>
+                            <button class="attendance-btn px-2 py-1 rounded text-xs ${studentAttendance === 'ALPA' ? 'bg-red-500 text-white' : 'bg-white border'}" 
+                                    data-student="${student.id}" data-status="ALPA" ${isLocked ? 'disabled' : ''}>ALPA</button>
+                        </div>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+            
+            // Add event listeners for attendance buttons
+            document.querySelectorAll('.attendance-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    if (isLocked) return;
+                    
+                    const studentId = e.target.dataset.student;
+                    const status = e.target.dataset.status;
+                    
+                    // Initialize attendance for this date if not exists
+                    if (!attendance[dateStr]) {
+                        attendance[dateStr] = {};
+                    }
+                    
+                    attendance[dateStr][studentId] = status;
+                    
+                    // Update button styles for this student
+                    const studentButtons = document.querySelectorAll(`[data-student="${studentId}"]`);
+                    studentButtons.forEach(button => {
+                        button.classList.remove('bg-green-500', 'bg-blue-500', 'bg-yellow-500', 'bg-red-500', 'text-white');
+                        button.classList.add('bg-white', 'border');
+                    });
+                    
+                    // Highlight selected button
+                    const colors = {
+                        'HADIR': 'bg-green-500',
+                        'SAKIT': 'bg-blue-500', 
+                        'IZIN': 'bg-yellow-500',
+                        'ALPA': 'bg-red-500'
+                    };
+                    
+                    e.target.classList.remove('bg-white', 'border');
+                    e.target.classList.add(colors[status], 'text-white');
+                });
+            });
+            
+            // Update save/edit buttons and other controls
+            const simpanBtn = document.getElementById('simpanAbsen');
+            const editBtn = document.getElementById('editAbsen');
+            const hadirSemuaBtn = document.getElementById('hadirSemua');
+            const liburBtn = document.getElementById('toggleLibur');
+            
+            if (isLocked) {
+                simpanBtn.textContent = 'TERSIMPAN';
+                simpanBtn.style.backgroundColor = '#6b7280';
+                simpanBtn.disabled = true;
+                editBtn.classList.remove('hidden');
+                
+                // Lock HADIR SEMUA and LIBUR buttons
+                hadirSemuaBtn.disabled = true;
+                hadirSemuaBtn.classList.remove('bg-green-500');
+                hadirSemuaBtn.classList.add('bg-gray-400');
+                
+                liburBtn.disabled = true;
+                if (liburBtn.classList.contains('bg-red-500')) {
+                    liburBtn.classList.remove('bg-red-500');
+                    liburBtn.classList.add('bg-gray-400');
+                } else if (liburBtn.classList.contains('bg-green-500')) {
+                    liburBtn.classList.remove('bg-green-500');
+                    liburBtn.classList.add('bg-gray-400');
+                }
+            } else {
+                simpanBtn.textContent = 'SIMPAN ABSEN';
+                simpanBtn.style.backgroundColor = '#4fd1c7';
+                simpanBtn.disabled = false;
+                editBtn.classList.add('hidden');
+                
+                // Unlock HADIR SEMUA and LIBUR buttons
+                hadirSemuaBtn.disabled = false;
+                hadirSemuaBtn.classList.remove('bg-gray-400');
+                hadirSemuaBtn.classList.add('bg-green-500');
+                
+                liburBtn.disabled = false;
+                liburBtn.classList.remove('bg-gray-400');
+                // Color will be set by updateAbsenDate function
+            }
+            
+            // Save attendance
+            simpanBtn.onclick = () => {
+                if (!attendance[dateStr]) {
+                    attendance[dateStr] = {};
+                }
+                attendance[dateStr].locked = true;
+                
+                simpanBtn.textContent = 'TERSIMPAN';
+                simpanBtn.style.backgroundColor = '#6b7280';
+                simpanBtn.disabled = true;
+                editBtn.classList.remove('hidden');
+                
+                // Disable all attendance buttons
+                document.querySelectorAll('.attendance-btn').forEach(btn => {
+                    btn.disabled = true;
+                });
+                
+                // Lock HADIR SEMUA and LIBUR buttons
+                const hadirSemuaBtn = document.getElementById('hadirSemua');
+                const liburBtn = document.getElementById('toggleLibur');
+                
+                hadirSemuaBtn.disabled = true;
+                hadirSemuaBtn.classList.remove('bg-green-500');
+                hadirSemuaBtn.classList.add('bg-gray-400');
+                
+                liburBtn.disabled = true;
+                if (liburBtn.classList.contains('bg-red-500')) {
+                    liburBtn.classList.remove('bg-red-500');
+                    liburBtn.classList.add('bg-gray-400');
+                } else if (liburBtn.classList.contains('bg-green-500')) {
+                    liburBtn.classList.remove('bg-green-500');
+                    liburBtn.classList.add('bg-gray-400');
+                }
+                
+                saveData();
+            };
+            
+            // Edit attendance
+            editBtn.onclick = () => {
+                if (attendance[dateStr]) {
+                    attendance[dateStr].locked = false;
+                }
+                
+                simpanBtn.textContent = 'SIMPAN ABSEN';
+                simpanBtn.style.backgroundColor = '#4fd1c7';
+                simpanBtn.disabled = false;
+                editBtn.classList.add('hidden');
+                
+                // Enable all attendance buttons
+                document.querySelectorAll('.attendance-btn').forEach(btn => {
+                    btn.disabled = false;
+                });
+                
+                // Unlock HADIR SEMUA and LIBUR buttons
+                const hadirSemuaBtn = document.getElementById('hadirSemua');
+                const liburBtn = document.getElementById('toggleLibur');
+                
+                hadirSemuaBtn.disabled = false;
+                hadirSemuaBtn.classList.remove('bg-gray-400');
+                hadirSemuaBtn.classList.add('bg-green-500');
+                
+                liburBtn.disabled = false;
+                liburBtn.classList.remove('bg-gray-400');
+                
+                // Restore original libur button color based on holiday status
+                if (holidays.has(dateStr)) {
+                    liburBtn.classList.add('bg-green-500');
+                } else {
+                    liburBtn.classList.add('bg-red-500');
+                }
+                
+                saveData();
+            };
+        }
+
+        // Hadir semua functionality
+        document.getElementById('hadirSemua').addEventListener('click', (e) => {
+            if (e.target.disabled) return;
+            
+            const dateStr = selectedDate.toDateString();
+            const currentAttendance = attendance[dateStr] || {};
+            const isLocked = currentAttendance.locked || false;
+            
+            if (isLocked) return;
+            
+            if (!attendance[dateStr]) {
+                attendance[dateStr] = {};
+            }
+            
+            students.forEach(student => {
+                attendance[dateStr][student.id] = 'HADIR';
+            });
+            
+            renderAbsenTable();
+        });
+
+        // History functionality - auto update when dropdown changes
+        document.getElementById('bulanRiwayat').addEventListener('change', () => {
+            const bulan = parseInt(document.getElementById('bulanRiwayat').value);
+            const tahun = parseInt(document.getElementById('tahunRiwayat').value);
+            renderRiwayatTable(bulan, tahun);
+        });
+        
+        document.getElementById('tahunRiwayat').addEventListener('change', () => {
+            const bulan = parseInt(document.getElementById('bulanRiwayat').value);
+            const tahun = parseInt(document.getElementById('tahunRiwayat').value);
+            renderRiwayatTable(bulan, tahun);
+        });
+
+        // Recap functionality - auto update when dropdown changes
+        document.getElementById('bulanRekap').addEventListener('change', () => {
+            const bulan = document.getElementById('bulanRekap').value;
+            const tahun = document.getElementById('tahunRekap').value;
+            renderRekapTable(bulan, tahun);
+        });
+        
+        document.getElementById('tahunRekap').addEventListener('change', () => {
+            const bulan = document.getElementById('bulanRekap').value;
+            const tahun = document.getElementById('tahunRekap').value;
+            renderRekapTable(bulan, tahun);
+        });
+
+        function renderRiwayatTable(bulan, tahun) {
+            const daysInMonth = new Date(tahun, bulan, 0).getDate();
+            const table = document.getElementById('riwayatTable');
+            
+            let headerHtml = '<thead class="bg-gray-100"><tr><th class="border border-gray-300 px-1 py-2 text-xs w-8">NO</th><th class="border border-gray-300 px-2 py-2 text-xs" style="min-width: 150px; max-width: 200px;">NAMA SISWA</th>';
+            
+            for (let day = 1; day <= daysInMonth; day++) {
+                headerHtml += `<th class="border border-gray-300 px-1 py-1 text-xs w-6">${day}</th>`;
+            }
+            headerHtml += '</tr></thead>';
+            
+            let bodyHtml = '<tbody>';
+            students.forEach((student, index) => {
+                bodyHtml += `<tr><td class="border border-gray-300 px-1 py-2 text-xs text-center">${index + 1}</td>`;
+                bodyHtml += `<td class="border border-gray-300 px-2 py-2 text-xs" style="min-width: 150px; max-width: 200px; word-wrap: break-word; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${student.nama}">${student.nama}</td>`;
+                
+                for (let day = 1; day <= daysInMonth; day++) {
+                    const date = new Date(tahun, bulan - 1, day);
+                    const dateStr = date.toDateString();
+                    const dayAttendance = attendance[dateStr];
+                    const studentAttendance = dayAttendance ? dayAttendance[student.id] : '';
+                    const isSunday = date.getDay() === 0;
+                    const isHoliday = holidays.has(dateStr);
+                    
+                    let cellClass = 'border border-gray-300 px-1 py-1 text-xs text-center w-6';
+                    let cellContent = '-';
+                    
+                    if (isSunday) {
+                        cellClass += ' bg-purple-200';
+                        cellContent = 'M';
+                    } else if (isHoliday) {
+                        cellClass += ' bg-orange-200';
+                        cellContent = 'L';
+                    } else if (studentAttendance) {
+                        switch (studentAttendance) {
+                            case 'HADIR':
+                                cellClass += ' bg-green-200';
+                                cellContent = 'H';
+                                break;
+                            case 'SAKIT':
+                                cellClass += ' bg-blue-200';
+                                cellContent = 'S';
+                                break;
+                            case 'IZIN':
+                                cellClass += ' bg-yellow-200';
+                                cellContent = 'I';
+                                break;
+                            case 'ALPA':
+                                cellClass += ' bg-red-200';
+                                cellContent = 'A';
+                                break;
+                        }
+                    }
+                    
+                    bodyHtml += `<td class="${cellClass}">${cellContent}</td>`;
+                }
+                bodyHtml += '</tr>';
+            });
+            bodyHtml += '</tbody>';
+            
+            table.innerHTML = headerHtml + bodyHtml;
+        }
+
+        function renderRekapTable(bulan, tahun) {
+            const tbody = document.getElementById('rekapTableBody');
+            tbody.innerHTML = '';
+            
+            students.forEach((student, index) => {
+                let hadir = 0, sakit = 0, izin = 0, alpa = 0;
+                
+                // Count attendance for each student
+                Object.keys(attendance).forEach(dateStr => {
+                    const date = new Date(dateStr);
+                    const attendanceData = attendance[dateStr];
+                    
+                    // Check if date matches selected month/year filter
+                    let includeDate = false;
+                    
+                    if (bulan === 'all' && tahun === 'all') {
+                        // Show all data regardless of date
+                        includeDate = true;
+                    } else if (bulan === 'all' && tahun !== 'all') {
+                        // Show all months for specific year
+                        includeDate = date.getFullYear() === parseInt(tahun);
+                    } else if (bulan !== 'all' && tahun === 'all') {
+                        // Show specific month for all years
+                        includeDate = (date.getMonth() + 1) === parseInt(bulan);
+                    } else {
+                        // Show specific month and year
+                        includeDate = date.getFullYear() === parseInt(tahun) && (date.getMonth() + 1) === parseInt(bulan);
+                    }
+                    
+                    if (includeDate && attendanceData[student.id]) {
+                        const status = attendanceData[student.id];
+                        switch (status) {
+                            case 'HADIR': hadir++; break;
+                            case 'SAKIT': sakit++; break;
+                            case 'IZIN': izin++; break;
+                            case 'ALPA': alpa++; break;
+                        }
+                    }
+                });
+                
+                // Calculate percentage
+                const totalKehadiran = hadir + sakit + izin + alpa;
+                const persentase = totalKehadiran > 0 ? ((hadir / totalKehadiran) * 100).toFixed(1) : '0.0';
+                
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td class="border border-gray-300 px-2 py-2 text-center">${index + 1}</td>
+                    <td class="border border-gray-300 px-2 py-2">${student.nama}</td>
+                    <td class="border border-gray-300 px-2 py-2 text-center bg-green-100">${hadir}</td>
+                    <td class="border border-gray-300 px-2 py-2 text-center bg-blue-100">${sakit}</td>
+                    <td class="border border-gray-300 px-2 py-2 text-center bg-yellow-100">${izin}</td>
+                    <td class="border border-gray-300 px-2 py-2 text-center bg-red-100">${alpa}</td>
+                    <td class="border border-gray-300 px-2 py-2 text-center text-white font-semibold" style="background-color: #4fd1c7;">${persentase}%</td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        // Download functionality
+        function setupDownloadFunctionality() {
+            // Download Riwayat Excel
+            document.getElementById('unduhRiwayatExcel').addEventListener('click', () => {
+                const bulan = document.getElementById('bulanUnduhRiwayat').value;
+                const tahun = document.getElementById('tahunUnduhRiwayat').value;
+                downloadRiwayatExcel(bulan, tahun);
+            });
+
+            // Download Riwayat PDF
+            document.getElementById('unduhRiwayatPDF').addEventListener('click', () => {
+                const bulan = document.getElementById('bulanUnduhRiwayat').value;
+                const tahun = document.getElementById('tahunUnduhRiwayat').value;
+                downloadRiwayatPDF(bulan, tahun);
+            });
+
+            // Download Rekap Excel
+            document.getElementById('unduhRekapExcel').addEventListener('click', () => {
+                const bulan = document.getElementById('bulanUnduhRekap').value;
+                const tahun = document.getElementById('tahunUnduhRekap').value;
+                downloadRekapExcel(bulan, tahun);
+            });
+
+            // Download Rekap PDF
+            document.getElementById('unduhRekapPDF').addEventListener('click', () => {
+                const bulan = document.getElementById('bulanUnduhRekap').value;
+                const tahun = document.getElementById('tahunUnduhRekap').value;
+                downloadRekapPDF(bulan, tahun);
+            });
+
+            // Send Email
+            document.getElementById('kirimEmail').addEventListener('click', () => {
+                const bulan = document.getElementById('bulanKirim').value;
+                const tahun = document.getElementById('tahunKirim').value;
+                
+                sendEmail(bulan, tahun);
+            });
+
+            // Send WhatsApp
+            document.getElementById('kirimWA').addEventListener('click', () => {
+                const bulan = document.getElementById('bulanKirim').value;
+                const tahun = document.getElementById('tahunKirim').value;
+                
+                sendWhatsApp(bulan, tahun);
+            });
+        }
+
+        function downloadRiwayatExcel(bulan, tahun) {
+            const monthNames = ['', 'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+                              'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+            
+            // Create workbook
+            const wb = XLSX.utils.book_new();
+            let worksheetData = [];
+            let fileName = 'ABSEN/Riwayat_Absen';
+            
+            // Header info
+            if (bulan === 'all' && tahun === 'all') {
+                worksheetData.push(['RIWAYAT ABSENSI SEMUA DATA']);
+                fileName += '_Semua_Data';
+            } else if (bulan === 'all') {
+                worksheetData.push([`RIWAYAT ABSENSI SEMUA BULAN ${tahun}`]);
+                fileName += `_Semua_Bulan_${tahun}`;
+            } else if (tahun === 'all') {
+                worksheetData.push([`RIWAYAT ABSENSI ${monthNames[parseInt(bulan)].toUpperCase()} SEMUA TAHUN`]);
+                fileName += `_${monthNames[parseInt(bulan)]}_Semua_Tahun`;
+            } else {
+                worksheetData.push([`RIWAYAT ABSENSI ${monthNames[parseInt(bulan)].toUpperCase()} ${tahun}`]);
+                fileName += `_${monthNames[parseInt(bulan)]}_${tahun}`;
+            }
+            
+            worksheetData.push([]);
+            worksheetData.push(['Sekolah:', document.getElementById('namaSekolah').value || 'Nama Sekolah']);
+            worksheetData.push(['Kelas:', document.getElementById('kelas').value || 'Kelas']);
+            worksheetData.push(['Wali Kelas:', document.getElementById('waliKelas').value || 'Wali Kelas']);
+            worksheetData.push(['Tanggal Cetak:', new Date().toLocaleDateString('id-ID')]);
+            worksheetData.push([]);
+            
+            if (bulan === 'all' && tahun === 'all') {
+                // Get all months that have data
+                const monthsWithData = new Set();
+                Object.keys(attendance).forEach(dateStr => {
+                    const date = new Date(dateStr);
+                    const monthYear = `${date.getMonth() + 1}-${date.getFullYear()}`;
+                    monthsWithData.add(monthYear);
+                });
+                
+                // Sort months chronologically
+                const sortedMonths = Array.from(monthsWithData).sort((a, b) => {
+                    const [monthA, yearA] = a.split('-').map(Number);
+                    const [monthB, yearB] = b.split('-').map(Number);
+                    return yearA - yearB || monthA - monthB;
+                });
+                
+                // Create table for each month
+                sortedMonths.forEach(monthYear => {
+                    const [month, year] = monthYear.split('-').map(Number);
+                    const daysInMonth = new Date(year, month, 0).getDate();
+                    
+                    worksheetData.push([`RIWAYAT ABSEN : ${monthNames[month].toUpperCase()} ${year}`]);
+                    
+                    // Table header
+                    let headerRow = ['NO', 'NAMA SISWA', 'NIS'];
+                    for (let day = 1; day <= daysInMonth; day++) {
+                        headerRow.push(day.toString());
+                    }
+                    headerRow.push('HADIR', 'SAKIT', 'IZIN', 'ALPA');
+                    worksheetData.push(headerRow);
+                    
+                    // Table data
+                    students.forEach((student, index) => {
+                        let row = [index + 1, student.nama, student.nis];
+                        let hadir = 0, sakit = 0, izin = 0, alpa = 0;
+                        
+                        for (let day = 1; day <= daysInMonth; day++) {
+                            const date = new Date(year, month - 1, day);
+                            const dateStr = date.toDateString();
+                            const dayAttendance = attendance[dateStr];
+                            const studentAttendance = dayAttendance ? dayAttendance[student.id] : '';
+                            const isSunday = date.getDay() === 0;
+                            const isHoliday = holidays.has(dateStr);
+                            
+                            let cellContent = '-';
+                            
+                            if (isSunday) {
+                                cellContent = 'M';
+                            } else if (isHoliday) {
+                                cellContent = 'L';
+                            } else if (studentAttendance) {
+                                switch (studentAttendance) {
+                                    case 'HADIR': cellContent = 'H'; hadir++; break;
+                                    case 'SAKIT': cellContent = 'S'; sakit++; break;
+                                    case 'IZIN': cellContent = 'I'; izin++; break;
+                                    case 'ALPA': cellContent = 'A'; alpa++; break;
+                                }
+                            }
+                            
+                            row.push(cellContent);
+                        }
+                        
+                        // Add summary columns
+                        row.push(hadir, sakit, izin, alpa);
+                        worksheetData.push(row);
+                    });
+                    
+                    worksheetData.push([]);
+                });
+                
+            } else if (bulan === 'all') {
+                // All months for specific year
+                for (let m = 1; m <= 12; m++) {
+                    const daysInMonth = new Date(parseInt(tahun), m, 0).getDate();
+                    
+                    // Check if this month has any data
+                    const hasData = Object.keys(attendance).some(dateStr => {
+                        const date = new Date(dateStr);
+                        return date.getFullYear() === parseInt(tahun) && (date.getMonth() + 1) === m;
+                    });
+                    
+                    if (!hasData) continue;
+                    
+                    worksheetData.push([`RIWAYAT ABSEN : ${monthNames[m].toUpperCase()} ${tahun}`]);
+                    
+                    // Table header
+                    let headerRow = ['NO', 'NAMA SISWA', 'NIS'];
+                    for (let day = 1; day <= daysInMonth; day++) {
+                        headerRow.push(day.toString());
+                    }
+                    headerRow.push('HADIR', 'SAKIT', 'IZIN', 'ALPA');
+                    worksheetData.push(headerRow);
+                    
+                    // Table data
+                    students.forEach((student, index) => {
+                        let row = [index + 1, student.nama, student.nis];
+                        let hadir = 0, sakit = 0, izin = 0, alpa = 0;
+                        
+                        for (let day = 1; day <= daysInMonth; day++) {
+                            const date = new Date(parseInt(tahun), m - 1, day);
+                            const dateStr = date.toDateString();
+                            const dayAttendance = attendance[dateStr];
+                            const studentAttendance = dayAttendance ? dayAttendance[student.id] : '';
+                            const isSunday = date.getDay() === 0;
+                            const isHoliday = holidays.has(dateStr);
+                            
+                            let cellContent = '-';
+                            
+                            if (isSunday) {
+                                cellContent = 'M';
+                            } else if (isHoliday) {
+                                cellContent = 'L';
+                            } else if (studentAttendance) {
+                                switch (studentAttendance) {
+                                    case 'HADIR': cellContent = 'H'; hadir++; break;
+                                    case 'SAKIT': cellContent = 'S'; sakit++; break;
+                                    case 'IZIN': cellContent = 'I'; izin++; break;
+                                    case 'ALPA': cellContent = 'A'; alpa++; break;
+                                }
+                            }
+                            
+                            row.push(cellContent);
+                        }
+                        
+                        // Add summary columns
+                        row.push(hadir, sakit, izin, alpa);
+                        worksheetData.push(row);
+                    });
+                    
+                    worksheetData.push([]);
+                }
+                
+            } else if (tahun === 'all') {
+                // Specific month for all years
+                const yearsWithData = new Set();
+                Object.keys(attendance).forEach(dateStr => {
+                    const date = new Date(dateStr);
+                    if ((date.getMonth() + 1) === parseInt(bulan)) {
+                        yearsWithData.add(date.getFullYear());
+                    }
+                });
+                
+                const sortedYears = Array.from(yearsWithData).sort();
+                
+                sortedYears.forEach(year => {
+                    const daysInMonth = new Date(year, parseInt(bulan), 0).getDate();
+                    
+                    worksheetData.push([`RIWAYAT ABSEN : ${monthNames[parseInt(bulan)].toUpperCase()} ${year}`]);
+                    
+                    // Table header
+                    let headerRow = ['NO', 'NAMA SISWA', 'NIS'];
+                    for (let day = 1; day <= daysInMonth; day++) {
+                        headerRow.push(day.toString());
+                    }
+                    headerRow.push('HADIR', 'SAKIT', 'IZIN', 'ALPA');
+                    worksheetData.push(headerRow);
+                    
+                    // Table data
+                    students.forEach((student, index) => {
+                        let row = [index + 1, student.nama, student.nis];
+                        let hadir = 0, sakit = 0, izin = 0, alpa = 0;
+                        
+                        for (let day = 1; day <= daysInMonth; day++) {
+                            const date = new Date(year, parseInt(bulan) - 1, day);
+                            const dateStr = date.toDateString();
+                            const dayAttendance = attendance[dateStr];
+                            const studentAttendance = dayAttendance ? dayAttendance[student.id] : '';
+                            const isSunday = date.getDay() === 0;
+                            const isHoliday = holidays.has(dateStr);
+                            
+                            let cellContent = '-';
+                            
+                            if (isSunday) {
+                                cellContent = 'M';
+                            } else if (isHoliday) {
+                                cellContent = 'L';
+                            } else if (studentAttendance) {
+                                switch (studentAttendance) {
+                                    case 'HADIR': cellContent = 'H'; hadir++; break;
+                                    case 'SAKIT': cellContent = 'S'; sakit++; break;
+                                    case 'IZIN': cellContent = 'I'; izin++; break;
+                                    case 'ALPA': cellContent = 'A'; alpa++; break;
+                                }
+                            }
+                            
+                            row.push(cellContent);
+                        }
+                        
+                        // Add summary columns
+                        row.push(hadir, sakit, izin, alpa);
+                        worksheetData.push(row);
+                    });
+                    
+                    worksheetData.push([]);
+                });
+                
+            } else {
+                // Specific month and year
+                const daysInMonth = new Date(parseInt(tahun), parseInt(bulan), 0).getDate();
+                
+                // Table header
+                let headerRow = ['NO', 'NAMA SISWA', 'NIS'];
+                for (let day = 1; day <= daysInMonth; day++) {
+                    headerRow.push(day.toString());
+                }
+                headerRow.push('HADIR', 'SAKIT', 'IZIN', 'ALPA');
+                worksheetData.push(headerRow);
+                
+                // Table data
+                students.forEach((student, index) => {
+                    let row = [index + 1, student.nama, student.nis];
+                    let hadir = 0, sakit = 0, izin = 0, alpa = 0;
+                    
+                    for (let day = 1; day <= daysInMonth; day++) {
+                        const date = new Date(parseInt(tahun), parseInt(bulan) - 1, day);
+                        const dateStr = date.toDateString();
+                        const dayAttendance = attendance[dateStr];
+                        const studentAttendance = dayAttendance ? dayAttendance[student.id] : '';
+                        const isSunday = date.getDay() === 0;
+                        const isHoliday = holidays.has(dateStr);
+                        
+                        let cellContent = '-';
+                        
+                        if (isSunday) {
+                            cellContent = 'M';
+                        } else if (isHoliday) {
+                            cellContent = 'L';
+                        } else if (studentAttendance) {
+                            switch (studentAttendance) {
+                                case 'HADIR': cellContent = 'H'; hadir++; break;
+                                case 'SAKIT': cellContent = 'S'; sakit++; break;
+                                case 'IZIN': cellContent = 'I'; izin++; break;
+                                case 'ALPA': cellContent = 'A'; alpa++; break;
+                            }
+                        }
+                        
+                        row.push(cellContent);
+                    }
+                    
+                    // Add summary columns
+                    row.push(hadir, sakit, izin, alpa);
+                    worksheetData.push(row);
+                });
+            }
+            
+            // Add legend
+            worksheetData.push([]);
+            worksheetData.push(['KETERANGAN:']);
+            worksheetData.push(['H = HADIR']);
+            worksheetData.push(['S = SAKIT']);
+            worksheetData.push(['I = IZIN']);
+            worksheetData.push(['A = ALPA']);
+            worksheetData.push(['M = MINGGU']);
+            worksheetData.push(['L = LIBUR']);
+            worksheetData.push(['- = BELUM DIISI']);
+            
+            // Create worksheet
+            const ws = XLSX.utils.aoa_to_sheet(worksheetData);
+            XLSX.utils.book_append_sheet(wb, ws, 'Riwayat Absen');
+            
+            // Enhanced download for mobile compatibility
+            try {
+                // Generate file buffer
+                const wbout = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
+                
+                // Create blob with proper MIME type
+                const blob = new Blob([wbout], { 
+                    type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' 
+                });
+                
+                // Create download link
+                const url = window.URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = fileName + '.xlsx';
+                link.style.display = 'none';
+                
+                // Trigger download
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                
+                // Clean up
+                setTimeout(() => window.URL.revokeObjectURL(url), 100);
+                
+                alert('✅ File Excel riwayat absen berhasil diunduh!\n\n📱 Di HP Android: Cek folder Download\n💻 Di PC: Cek folder Download browser');
+                
+            } catch (error) {
+                console.error('Download error:', error);
+                // Fallback to original method
+                XLSX.writeFile(wb, fileName + '.xlsx');
+                alert('File Excel riwayat absen berhasil diunduh!');
+            }
+        }
+
+        function downloadRiwayatPDF(bulan, tahun) {
+            const monthNames = ['', 'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+                              'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+            
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF('landscape', 'mm', 'a4');
+            
+            // Set font
+            doc.setFont('helvetica');
+            
+            let fileName = 'Riwayat_Absen';
+            let currentY = 15;
+            
+            // Title
+            doc.setFontSize(16);
+            doc.setFont('helvetica', 'bold');
+            
+            if (bulan === 'all' && tahun === 'all') {
+                doc.text('RIWAYAT ABSENSI SEMUA DATA', 148, currentY, { align: 'center' });
+                fileName += '_Semua_Data';
+            } else if (bulan === 'all') {
+                doc.text(`RIWAYAT ABSENSI SEMUA BULAN ${tahun}`, 148, currentY, { align: 'center' });
+                fileName += `_Semua_Bulan_${tahun}`;
+            } else if (tahun === 'all') {
+                doc.text(`RIWAYAT ABSENSI ${monthNames[parseInt(bulan)].toUpperCase()} SEMUA TAHUN`, 148, currentY, { align: 'center' });
+                fileName += `_${monthNames[parseInt(bulan)]}_Semua_Tahun`;
+            } else {
+                doc.text(`RIWAYAT ABSENSI ${monthNames[parseInt(bulan)].toUpperCase()} ${tahun}`, 148, currentY, { align: 'center' });
+                fileName += `_${monthNames[parseInt(bulan)]}_${tahun}`;
+            }
+            
+            currentY += 15;
+            
+            // School info in table format
+            doc.setFontSize(10);
+            doc.setFont('helvetica', 'normal');
+            
+            // Create school info table
+            const schoolInfoData = [
+                ['Sekolah:', document.getElementById('namaSekolah').value || 'Nama Sekolah'],
+                ['Kelas:', document.getElementById('kelas').value || 'Kelas'],
+                ['Wali Kelas:', document.getElementById('waliKelas').value || 'Wali Kelas'],
+                ['Tanggal Cetak:', new Date().toLocaleDateString('id-ID')]
+            ];
+            
+            doc.autoTable({
+                body: schoolInfoData,
+                startY: currentY,
+                styles: {
+                    fontSize: 10,
+                    cellPadding: 3,
+                    lineColor: [0, 0, 0],
+                    lineWidth: 0.1,
+                },
+                columnStyles: {
+                    0: { cellWidth: 40, fontStyle: 'bold' },
+                    1: { cellWidth: 227 }
+                },
+                margin: { left: 15, right: 15 },
+                theme: 'grid'
+            });
+            
+            currentY = doc.lastAutoTable.finalY + 15;
+            
+            if (bulan === 'all' && tahun === 'all') {
+                // Get all months that have data
+                const monthsWithData = new Set();
+                Object.keys(attendance).forEach(dateStr => {
+                    const date = new Date(dateStr);
+                    const monthYear = `${date.getMonth() + 1}-${date.getFullYear()}`;
+                    monthsWithData.add(monthYear);
+                });
+                
+                // Sort months chronologically
+                const sortedMonths = Array.from(monthsWithData).sort((a, b) => {
+                    const [monthA, yearA] = a.split('-').map(Number);
+                    const [monthB, yearB] = b.split('-').map(Number);
+                    return yearA - yearB || monthA - monthB;
+                });
+                
+                // Create table for each month
+                sortedMonths.forEach((monthYear, index) => {
+                    if (index > 0) {
+                        doc.addPage();
+                        currentY = 15;
+                    }
+                    
+                    const [month, year] = monthYear.split('-').map(Number);
+                    const daysInMonth = new Date(year, month, 0).getDate();
+                    
+                    doc.setFontSize(12);
+                    doc.setFont('helvetica', 'bold');
+                    doc.text(`RIWAYAT ABSEN : ${monthNames[month].toUpperCase()} ${year}`, 15, currentY);
+                    
+                    currentY += 8;
+                    
+                    // Prepare table data
+                    let headers = ['NO', 'NAMA SISWA'];
+                    let columnStyles = {
+                        0: { cellWidth: 12, halign: 'center' },
+                        1: { cellWidth: 50 }
+                    };
+                    
+                    // Add day columns
+                    const availableWidth = 267 - 62 - 24; // Total width - NO - NAMA - Summary columns (24 for 4x6)
+                    const dayWidth = Math.min(5.5, availableWidth / daysInMonth);
+                    
+                    for (let day = 1; day <= daysInMonth; day++) {
+                        headers.push(day.toString());
+                        columnStyles[day + 1] = { cellWidth: dayWidth, halign: 'center' };
+                    }
+                    
+                    // Add summary columns with short format
+                    headers.push('H', 'S', 'I', 'A');
+                    columnStyles[daysInMonth + 2] = { cellWidth: 6, halign: 'center', fillColor: [220, 252, 231] };
+                    columnStyles[daysInMonth + 3] = { cellWidth: 6, halign: 'center', fillColor: [219, 234, 254] };
+                    columnStyles[daysInMonth + 4] = { cellWidth: 6, halign: 'center', fillColor: [254, 249, 195] };
+                    columnStyles[daysInMonth + 5] = { cellWidth: 6, halign: 'center', fillColor: [254, 226, 226] };
+                    
+                    let tableData = [];
+                    students.forEach((student, index) => {
+                        let row = [index + 1, student.nama.length > 25 ? student.nama.substring(0, 22) + '...' : student.nama];
+                        let hadir = 0, sakit = 0, izin = 0, alpa = 0;
+                        
+                        for (let day = 1; day <= daysInMonth; day++) {
+                            const date = new Date(year, month - 1, day);
+                            const dateStr = date.toDateString();
+                            const dayAttendance = attendance[dateStr];
+                            const studentAttendance = dayAttendance ? dayAttendance[student.id] : '';
+                            const isSunday = date.getDay() === 0;
+                            const isHoliday = holidays.has(dateStr);
+                            
+                            let cellContent = '-';
+                            
+                            if (isSunday) {
+                                cellContent = 'M';
+                            } else if (isHoliday) {
+                                cellContent = 'L';
+                            } else if (studentAttendance) {
+                                switch (studentAttendance) {
+                                    case 'HADIR': cellContent = 'H'; hadir++; break;
+                                    case 'SAKIT': cellContent = 'S'; sakit++; break;
+                                    case 'IZIN': cellContent = 'I'; izin++; break;
+                                    case 'ALPA': cellContent = 'A'; alpa++; break;
+                                }
+                            }
+                            
+                            row.push(cellContent);
+                        }
+                        
+                        // Add summary columns
+                        row.push(hadir, sakit, izin, alpa);
+                        tableData.push(row);
+                    });
+                    
+                    // Create table
+                    doc.autoTable({
+                        head: [headers],
+                        body: tableData,
+                        startY: currentY,
+                        styles: {
+                            fontSize: 6,
+                            cellPadding: 1,
+                            lineColor: [0, 0, 0],
+                            lineWidth: 0.1,
+                        },
+                        headStyles: {
+                            fillColor: [248, 187, 217],
+                            textColor: 255,
+                            fontStyle: 'bold',
+                            fontSize: 7,
+                            cellPadding: 1.5
+                        },
+                        columnStyles: columnStyles,
+                        margin: { left: 15, right: 15 },
+                        tableWidth: 'auto',
+                        theme: 'grid'
+                    });
+                    
+                    currentY = doc.lastAutoTable.finalY + 15;
+                });
+                
+            } else if (bulan !== 'all' && tahun !== 'all') {
+                // Specific month and year
+                const daysInMonth = new Date(parseInt(tahun), parseInt(bulan), 0).getDate();
+                
+                let headers = ['NO', 'NAMA SISWA'];
+                let columnStyles = {
+                    0: { cellWidth: 12, halign: 'center' },
+                    1: { cellWidth: 50 }
+                };
+                
+                // Add day columns
+                const availableWidth = 267 - 62 - 24; // Total width - NO - NAMA - Summary columns (24 for 4x6)
+                const dayWidth = Math.min(5.5, availableWidth / daysInMonth);
+                
+                for (let day = 1; day <= daysInMonth; day++) {
+                    headers.push(day.toString());
+                    columnStyles[day + 1] = { cellWidth: dayWidth, halign: 'center' };
+                }
+                
+                // Add summary columns with short format
+                headers.push('H', 'S', 'I', 'A');
+                columnStyles[daysInMonth + 2] = { cellWidth: 6, halign: 'center', fillColor: [220, 252, 231] };
+                columnStyles[daysInMonth + 3] = { cellWidth: 6, halign: 'center', fillColor: [219, 234, 254] };
+                columnStyles[daysInMonth + 4] = { cellWidth: 6, halign: 'center', fillColor: [254, 249, 195] };
+                columnStyles[daysInMonth + 5] = { cellWidth: 6, halign: 'center', fillColor: [254, 226, 226] };
+                
+                let tableData = [];
+                students.forEach((student, index) => {
+                    let row = [index + 1, student.nama.length > 25 ? student.nama.substring(0, 22) + '...' : student.nama];
+                    let hadir = 0, sakit = 0, izin = 0, alpa = 0;
+                    
+                    for (let day = 1; day <= daysInMonth; day++) {
+                        const date = new Date(parseInt(tahun), parseInt(bulan) - 1, day);
+                        const dateStr = date.toDateString();
+                        const dayAttendance = attendance[dateStr];
+                        const studentAttendance = dayAttendance ? dayAttendance[student.id] : '';
+                        const isSunday = date.getDay() === 0;
+                        const isHoliday = holidays.has(dateStr);
+                        
+                        let cellContent = '-';
+                        
+                        if (isSunday) {
+                            cellContent = 'M';
+                        } else if (isHoliday) {
+                            cellContent = 'L';
+                        } else if (studentAttendance) {
+                            switch (studentAttendance) {
+                                case 'HADIR': cellContent = 'H'; hadir++; break;
+                                case 'SAKIT': cellContent = 'S'; sakit++; break;
+                                case 'IZIN': cellContent = 'I'; izin++; break;
+                                case 'ALPA': cellContent = 'A'; alpa++; break;
+                            }
+                        }
+                        
+                        row.push(cellContent);
+                    }
+                    
+                    // Add summary columns
+                    row.push(hadir, sakit, izin, alpa);
+                    tableData.push(row);
+                });
+                
+                // Create table
+                doc.autoTable({
+                    head: [headers],
+                    body: tableData,
+                    startY: currentY,
+                    styles: {
+                        fontSize: 6,
+                        cellPadding: 1,
+                        lineColor: [0, 0, 0],
+                        lineWidth: 0.1,
+                    },
+                    headStyles: {
+                        fillColor: [79, 209, 199],
+                        textColor: 255,
+                        fontStyle: 'bold',
+                        fontSize: 7,
+                        cellPadding: 1.5
+                    },
+                    columnStyles: columnStyles,
+                    margin: { left: 15, right: 15 },
+                    tableWidth: 'auto',
+                    theme: 'grid'
+                });
+            } else {
+                // Handle other cases (all months for specific year, specific month for all years)
+                if (bulan === 'all') {
+                    // All months for specific year
+                    for (let m = 1; m <= 12; m++) {
+                        const daysInMonth = new Date(parseInt(tahun), m, 0).getDate();
+                        
+                        // Check if this month has any data
+                        const hasData = Object.keys(attendance).some(dateStr => {
+                            const date = new Date(dateStr);
+                            return date.getFullYear() === parseInt(tahun) && (date.getMonth() + 1) === m;
+                        });
+                        
+                        if (!hasData) continue;
+                        
+                        if (m > 1) {
+                            doc.addPage();
+                            currentY = 15;
+                        }
+                        
+                        doc.setFontSize(12);
+                        doc.setFont('helvetica', 'bold');
+                        doc.text(`RIWAYAT ABSEN : ${monthNames[m].toUpperCase()} ${tahun}`, 15, currentY);
+                        
+                        currentY += 8;
+                        
+                        // Create table for this month
+                        let headers = ['NO', 'NAMA SISWA'];
+                        let columnStyles = {
+                            0: { cellWidth: 12, halign: 'center' },
+                            1: { cellWidth: 50 }
+                        };
+                        
+                        const availableWidth = 267 - 62 - 24; // Total width - NO - NAMA - Summary columns (24 for 4x6)
+                        const dayWidth = Math.min(5.5, availableWidth / daysInMonth);
+                        
+                        for (let day = 1; day <= daysInMonth; day++) {
+                            headers.push(day.toString());
+                            columnStyles[day + 1] = { cellWidth: dayWidth, halign: 'center' };
+                        }
+                        
+                        headers.push('H', 'S', 'I', 'A');
+                        columnStyles[daysInMonth + 2] = { cellWidth: 6, halign: 'center', fillColor: [220, 252, 231] };
+                        columnStyles[daysInMonth + 3] = { cellWidth: 6, halign: 'center', fillColor: [219, 234, 254] };
+                        columnStyles[daysInMonth + 4] = { cellWidth: 6, halign: 'center', fillColor: [254, 249, 195] };
+                        columnStyles[daysInMonth + 5] = { cellWidth: 6, halign: 'center', fillColor: [254, 226, 226] };
+                        
+                        let tableData = [];
+                        students.forEach((student, index) => {
+                            let row = [index + 1, student.nama.length > 25 ? student.nama.substring(0, 22) + '...' : student.nama];
+                            let hadir = 0, sakit = 0, izin = 0, alpa = 0;
+                            
+                            for (let day = 1; day <= daysInMonth; day++) {
+                                const date = new Date(parseInt(tahun), m - 1, day);
+                                const dateStr = date.toDateString();
+                                const dayAttendance = attendance[dateStr];
+                                const studentAttendance = dayAttendance ? dayAttendance[student.id] : '';
+                                const isSunday = date.getDay() === 0;
+                                const isHoliday = holidays.has(dateStr);
+                                
+                                let cellContent = '-';
+                                
+                                if (isSunday) {
+                                    cellContent = 'M';
+                                } else if (isHoliday) {
+                                    cellContent = 'L';
+                                } else if (studentAttendance) {
+                                    switch (studentAttendance) {
+                                        case 'HADIR': cellContent = 'H'; hadir++; break;
+                                        case 'SAKIT': cellContent = 'S'; sakit++; break;
+                                        case 'IZIN': cellContent = 'I'; izin++; break;
+                                        case 'ALPA': cellContent = 'A'; alpa++; break;
+                                    }
+                                }
+                                
+                                row.push(cellContent);
+                            }
+                            
+                            row.push(hadir, sakit, izin, alpa);
+                            tableData.push(row);
+                        });
+                        
+                        doc.autoTable({
+                            head: [headers],
+                            body: tableData,
+                            startY: currentY,
+                            styles: {
+                                fontSize: 6,
+                                cellPadding: 1,
+                                lineColor: [0, 0, 0],
+                                lineWidth: 0.1,
+                            },
+                            headStyles: {
+                                fillColor: [248, 187, 217],
+                                textColor: 255,
+                                fontStyle: 'bold',
+                                fontSize: 7,
+                                cellPadding: 1.5
+                            },
+                            columnStyles: columnStyles,
+                            margin: { left: 15, right: 15 },
+                            tableWidth: 'auto',
+                            theme: 'grid'
+                        });
+                        
+                        currentY = doc.lastAutoTable.finalY + 15;
+                    }
+                } else if (tahun === 'all') {
+                    // Specific month for all years
+                    const yearsWithData = new Set();
+                    Object.keys(attendance).forEach(dateStr => {
+                        const date = new Date(dateStr);
+                        if ((date.getMonth() + 1) === parseInt(bulan)) {
+                            yearsWithData.add(date.getFullYear());
+                        }
+                    });
+                    
+                    const sortedYears = Array.from(yearsWithData).sort();
+                    
+                    sortedYears.forEach((year, index) => {
+                        if (index > 0) {
+                            doc.addPage();
+                            currentY = 15;
+                        }
+                        
+                        const daysInMonth = new Date(year, parseInt(bulan), 0).getDate();
+                        
+                        doc.setFontSize(12);
+                        doc.setFont('helvetica', 'bold');
+                        doc.text(`RIWAYAT ABSEN : ${monthNames[parseInt(bulan)].toUpperCase()} ${year}`, 15, currentY);
+                        
+                        currentY += 8;
+                        
+                        // Create table for this year
+                        let headers = ['NO', 'NAMA SISWA'];
+                        let columnStyles = {
+                            0: { cellWidth: 12, halign: 'center' },
+                            1: { cellWidth: 50 }
+                        };
+                        
+                        const availableWidth = 267 - 62 - 24; // Total width - NO - NAMA - Summary columns (24 for 4x6)
+                        const dayWidth = Math.min(5.5, availableWidth / daysInMonth);
+                        
+                        for (let day = 1; day <= daysInMonth; day++) {
+                            headers.push(day.toString());
+                            columnStyles[day + 1] = { cellWidth: dayWidth, halign: 'center' };
+                        }
+                        
+                        headers.push('H', 'S', 'I', 'A');
+                        columnStyles[daysInMonth + 2] = { cellWidth: 6, halign: 'center', fillColor: [220, 252, 231] };
+                        columnStyles[daysInMonth + 3] = { cellWidth: 6, halign: 'center', fillColor: [219, 234, 254] };
+                        columnStyles[daysInMonth + 4] = { cellWidth: 6, halign: 'center', fillColor: [254, 249, 195] };
+                        columnStyles[daysInMonth + 5] = { cellWidth: 6, halign: 'center', fillColor: [254, 226, 226] };
+                        
+                        let tableData = [];
+                        students.forEach((student, index) => {
+                            let row = [index + 1, student.nama.length > 25 ? student.nama.substring(0, 22) + '...' : student.nama];
+                            let hadir = 0, sakit = 0, izin = 0, alpa = 0;
+                            
+                            for (let day = 1; day <= daysInMonth; day++) {
+                                const date = new Date(year, parseInt(bulan) - 1, day);
+                                const dateStr = date.toDateString();
+                                const dayAttendance = attendance[dateStr];
+                                const studentAttendance = dayAttendance ? dayAttendance[student.id] : '';
+                                const isSunday = date.getDay() === 0;
+                                const isHoliday = holidays.has(dateStr);
+                                
+                                let cellContent = '-';
+                                
+                                if (isSunday) {
+                                    cellContent = 'M';
+                                } else if (isHoliday) {
+                                    cellContent = 'L';
+                                } else if (studentAttendance) {
+                                    switch (studentAttendance) {
+                                        case 'HADIR': cellContent = 'H'; hadir++; break;
+                                        case 'SAKIT': cellContent = 'S'; sakit++; break;
+                                        case 'IZIN': cellContent = 'I'; izin++; break;
+                                        case 'ALPA': cellContent = 'A'; alpa++; break;
+                                    }
+                                }
+                                
+                                row.push(cellContent);
+                            }
+                            
+                            row.push(hadir, sakit, izin, alpa);
+                            tableData.push(row);
+                        });
+                        
+                        doc.autoTable({
+                            head: [headers],
+                            body: tableData,
+                            startY: currentY,
+                            styles: {
+                                fontSize: 6,
+                                cellPadding: 1,
+                                lineColor: [0, 0, 0],
+                                lineWidth: 0.1,
+                            },
+                            headStyles: {
+                                fillColor: [248, 187, 217],
+                                textColor: 255,
+                                fontStyle: 'bold',
+                                fontSize: 7,
+                                cellPadding: 1.5
+                            },
+                            columnStyles: columnStyles,
+                            margin: { left: 15, right: 15 },
+                            tableWidth: 'auto',
+                            theme: 'grid'
+                        });
+                        
+                        currentY = doc.lastAutoTable.finalY + 15;
+                    });
+                }
+            }
+            
+            // Add legend on last page
+            const finalY = doc.lastAutoTable ? doc.lastAutoTable.finalY + 8 : currentY + 50;
+            
+            // Create legend table
+            const legendData = [
+                ['KETERANGAN:', ''],
+                ['H = HADIR', 'S = SAKIT'],
+                ['I = IZIN', 'A = ALPA'],
+                ['M = MINGGU', 'L = LIBUR'],
+                ['- = BELUM DIISI', '']
+            ];
+            
+            doc.autoTable({
+                body: legendData,
+                startY: finalY,
+                styles: {
+                    fontSize: 8,
+                    cellPadding: 2,
+                    lineColor: [0, 0, 0],
+                    lineWidth: 0.1,
+                },
+                columnStyles: {
+                    0: { cellWidth: 133.5, fontStyle: 'bold' },
+                    1: { cellWidth: 133.5, fontStyle: 'bold' }
+                },
+                margin: { left: 15, right: 15 },
+                theme: 'grid'
+            });
+            
+            // Add footer
+            doc.setFontSize(7);
+            doc.text(`Dicetak pada: ${new Date().toLocaleDateString('id-ID')} ${new Date().toLocaleTimeString('id-ID')}`, 15, doc.lastAutoTable.finalY + 8);
+            
+            // Enhanced PDF download for mobile compatibility
+            try {
+                // Generate PDF blob
+                const pdfBlob = doc.output('blob');
+                
+                // Create download link
+                const url = window.URL.createObjectURL(pdfBlob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = fileName + '.pdf';
+                link.style.display = 'none';
+                
+                // Trigger download
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                
+                // Clean up
+                setTimeout(() => window.URL.revokeObjectURL(url), 100);
+                
+                alert('✅ File PDF riwayat absen berhasil diunduh!\n\n📱 Di HP Android: Cek folder Download\n💻 Di PC: Cek folder Download browser');
+                
+            } catch (error) {
+                console.error('PDF Download error:', error);
+                // Fallback to original method
+                doc.save(fileName + '.pdf');
+                alert('File PDF riwayat absen berhasil diunduh!');
+            }
+        }
+
+        function downloadRekapExcel(bulan, tahun) {
+            const monthNames = ['', 'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+                              'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+            
+            // Create workbook
+            const wb = XLSX.utils.book_new();
+            
+            // Prepare data
+            let worksheetData = [];
+            let fileName = 'ABSEN/Rekap_Absen';
+            
+            // Header info
+            worksheetData.push(['REKAP ABSEN SISWA']);
+            worksheetData.push([`Sekolah: ${document.getElementById('namaSekolah').value || 'Belum diisi'}`]);
+            worksheetData.push([`Kelas: ${document.getElementById('kelas').value || 'Belum diisi'}`]);
+            worksheetData.push([`Wali Kelas: ${document.getElementById('waliKelas').value || 'Belum diisi'}`]);
+            
+            if (bulan === 'all' && tahun === 'all') {
+                worksheetData.push(['Periode: SEMUA DATA']);
+                fileName += '_Semua_Data';
+            } else if (bulan === 'all') {
+                worksheetData.push([`Periode: SEMUA BULAN ${tahun}`]);
+                fileName += `_Semua_Bulan_${tahun}`;
+            } else if (tahun === 'all') {
+                worksheetData.push([`Periode: ${monthNames[parseInt(bulan)]} SEMUA TAHUN`]);
+                fileName += `_${monthNames[parseInt(bulan)]}_Semua_Tahun`;
+            } else {
+                worksheetData.push([`Periode: ${monthNames[parseInt(bulan)]} ${tahun}`]);
+                fileName += `_${monthNames[parseInt(bulan)]}_${tahun}`;
+            }
+            
+            // Empty row
+            worksheetData.push([]);
+            
+            // Table header
+            worksheetData.push(['NO', 'NAMA', 'HADIR', 'SAKIT', 'IZIN', 'ALPA', 'PERSENTASE']);
+            
+            // Table data
+            students.forEach((student, index) => {
+                let hadir = 0, sakit = 0, izin = 0, alpa = 0;
+                
+                // Count attendance for each student
+                Object.keys(attendance).forEach(dateStr => {
+                    const date = new Date(dateStr);
+                    const attendanceData = attendance[dateStr];
+                    
+                    // Check if date matches selected month/year filter
+                    let includeDate = false;
+                    
+                    if (bulan === 'all' && tahun === 'all') {
+                        includeDate = true;
+                    } else if (bulan === 'all' && tahun !== 'all') {
+                        includeDate = date.getFullYear() === parseInt(tahun);
+                    } else if (bulan !== 'all' && tahun === 'all') {
+                        includeDate = (date.getMonth() + 1) === parseInt(bulan);
+                    } else {
+                        includeDate = date.getFullYear() === parseInt(tahun) && (date.getMonth() + 1) === parseInt(bulan);
+                    }
+                    
+                    if (includeDate && attendanceData[student.id]) {
+                        const status = attendanceData[student.id];
+                        switch (status) {
+                            case 'HADIR': hadir++; break;
+                            case 'SAKIT': sakit++; break;
+                            case 'IZIN': izin++; break;
+                            case 'ALPA': alpa++; break;
+                        }
+                    }
+                });
+                
+                // Calculate percentage
+                const totalKehadiran = hadir + sakit + izin + alpa;
+                const persentase = totalKehadiran > 0 ? ((hadir / totalKehadiran) * 100).toFixed(1) : '0.0';
+                
+                worksheetData.push([index + 1, student.nama, hadir, sakit, izin, alpa, persentase + '%']);
+            });
+            
+            // Create worksheet
+            const ws = XLSX.utils.aoa_to_sheet(worksheetData);
+            XLSX.utils.book_append_sheet(wb, ws, 'Rekap Absen');
+            
+            // Enhanced download for mobile compatibility
+            try {
+                // Generate file buffer
+                const wbout = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
+                
+                // Create blob with proper MIME type
+                const blob = new Blob([wbout], { 
+                    type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' 
+                });
+                
+                // Create download link
+                const url = window.URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = fileName + '.xlsx';
+                link.style.display = 'none';
+                
+                // Trigger download
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                
+                // Clean up
+                setTimeout(() => window.URL.revokeObjectURL(url), 100);
+                
+                alert('✅ File Excel rekap absen berhasil diunduh!\n\n📱 Di HP Android: Cek folder Download\n💻 Di PC: Cek folder Download browser');
+                
+            } catch (error) {
+                console.error('Download error:', error);
+                // Fallback to original method
+                XLSX.writeFile(wb, fileName + '.xlsx');
+                alert('File Excel rekap absen berhasil diunduh!');
+            }
+        }
+
+        function downloadRekapPDF(bulan, tahun) {
+            const monthNames = ['', 'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+                              'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+            
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF('portrait', 'mm', 'a4');
+            
+            // Set font
+            doc.setFont('helvetica');
+            
+            // Title
+            doc.setFontSize(18);
+            doc.setFont('helvetica', 'bold');
+            doc.text('REKAP ABSEN SISWA', 105, 15, { align: 'center' });
+            
+            // School info box
+            doc.setFontSize(10);
+            doc.setFont('helvetica', 'normal');
+            doc.rect(15, 22, 180, 25);
+            doc.text(`Sekolah: ${document.getElementById('namaSekolah').value || 'Belum diisi'}`, 20, 30);
+            doc.text(`Kelas: ${document.getElementById('kelas').value || 'Belum diisi'}`, 20, 36);
+            doc.text(`Wali Kelas: ${document.getElementById('waliKelas').value || 'Belum diisi'}`, 20, 42);
+            
+            // Period
+            let periodText = '';
+            let fileName = 'Rekap_Absen';
+            
+            if (bulan === 'all' && tahun === 'all') {
+                periodText = 'Periode: SEMUA DATA';
+                fileName += '_Semua_Data';
+            } else if (bulan === 'all') {
+                periodText = `Periode: SEMUA BULAN ${tahun}`;
+                fileName += `_Semua_Bulan_${tahun}`;
+            } else if (tahun === 'all') {
+                periodText = `Periode: ${monthNames[parseInt(bulan)]} SEMUA TAHUN`;
+                fileName += `_${monthNames[parseInt(bulan)]}_Semua_Tahun`;
+            } else {
+                periodText = `Periode: ${monthNames[parseInt(bulan)]} ${tahun}`;
+                fileName += `_${monthNames[parseInt(bulan)]}_${tahun}`;
+            }
+            
+            doc.setFont('helvetica', 'bold');
+            doc.text(periodText, 105, 54, { align: 'center' });
+            
+            // Prepare table data
+            let tableData = [];
+            
+            students.forEach((student, index) => {
+                let hadir = 0, sakit = 0, izin = 0, alpa = 0;
+                
+                // Count attendance for each student
+                Object.keys(attendance).forEach(dateStr => {
+                    const date = new Date(dateStr);
+                    const attendanceData = attendance[dateStr];
+                    
+                    // Check if date matches selected month/year filter
+                    let includeDate = false;
+                    
+                    if (bulan === 'all' && tahun === 'all') {
+                        includeDate = true;
+                    } else if (bulan === 'all' && tahun !== 'all') {
+                        includeDate = date.getFullYear() === parseInt(tahun);
+                    } else if (bulan !== 'all' && tahun === 'all') {
+                        includeDate = (date.getMonth() + 1) === parseInt(bulan);
+                    } else {
+                        includeDate = date.getFullYear() === parseInt(tahun) && (date.getMonth() + 1) === parseInt(bulan);
+                    }
+                    
+                    if (includeDate && attendanceData[student.id]) {
+                        const status = attendanceData[student.id];
+                        switch (status) {
+                            case 'HADIR': hadir++; break;
+                            case 'SAKIT': sakit++; break;
+                            case 'IZIN': izin++; break;
+                            case 'ALPA': alpa++; break;
+                        }
+                    }
+                });
+                
+                // Calculate percentage
+                const totalKehadiran = hadir + sakit + izin + alpa;
+                const persentase = totalKehadiran > 0 ? ((hadir / totalKehadiran) * 100).toFixed(1) : '0.0';
+                
+                const studentName = student.nama.length > 30 ? student.nama.substring(0, 27) + '...' : student.nama;
+                tableData.push([
+                    index + 1, 
+                    studentName,
+                    hadir, 
+                    sakit, 
+                    izin, 
+                    alpa, 
+                    persentase + '%'
+                ]);
+            });
+            
+            // Create table with better styling
+            doc.autoTable({
+                head: [['NO', 'NAMA SISWA', 'HADIR', 'SAKIT', 'IZIN', 'ALPA', 'PERSENTASE']],
+                body: tableData,
+                startY: 60,
+                styles: {
+                    fontSize: 8,
+                    cellPadding: 2,
+                    lineColor: [0, 0, 0],
+                    lineWidth: 0.1,
+                },
+                headStyles: {
+                    fillColor: [79, 209, 199],
+                    textColor: 255,
+                    fontStyle: 'bold',
+                    fontSize: 9,
+                    cellPadding: 3
+                },
+                columnStyles: {
+                    0: { cellWidth: 15, halign: 'center' },
+                    1: { cellWidth: 70 },
+                    2: { cellWidth: 18, halign: 'center', fillColor: [220, 252, 231] },
+                    3: { cellWidth: 18, halign: 'center', fillColor: [219, 234, 254] },
+                    4: { cellWidth: 18, halign: 'center', fillColor: [254, 249, 195] },
+                    5: { cellWidth: 18, halign: 'center', fillColor: [254, 226, 226] },
+                    6: { cellWidth: 23, halign: 'center', fillColor: [204, 251, 241] }
+                },
+                margin: { left: 15, right: 15 },
+                tableWidth: 'auto',
+                theme: 'grid'
+            });
+            
+            // Add legend in a box
+            const finalY = doc.lastAutoTable.finalY + 8;
+            doc.rect(15, finalY, 180, 25);
+            doc.setFontSize(9);
+            doc.setFont('helvetica', 'bold');
+            doc.text('KETERANGAN WARNA:', 20, finalY + 6);
+            doc.setFont('helvetica', 'normal');
+            doc.setFontSize(8);
+            doc.text('🟢 HADIR = Hijau     🔵 SAKIT = Biru     🟡 IZIN = Kuning', 20, finalY + 12);
+            doc.text('🔴 ALPA = Merah     🟦 PERSENTASE = Biru Muda', 20, finalY + 18);
+            
+            // Add footer
+            doc.setFontSize(7);
+            doc.text(`Dicetak pada: ${new Date().toLocaleDateString('id-ID')} ${new Date().toLocaleTimeString('id-ID')}`, 20, finalY + 22);
+            
+            // Enhanced PDF download for mobile compatibility
+            try {
+                // Generate PDF blob
+                const pdfBlob = doc.output('blob');
+                
+                // Create download link
+                const url = window.URL.createObjectURL(pdfBlob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = fileName + '.pdf';
+                link.style.display = 'none';
+                
+                // Trigger download
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                
+                // Clean up
+                setTimeout(() => window.URL.revokeObjectURL(url), 100);
+                
+                alert('✅ File PDF rekap absen berhasil diunduh!\n\n📱 Di HP Android: Cek folder Download\n💻 Di PC: Cek folder Download browser');
+                
+            } catch (error) {
+                console.error('PDF Download error:', error);
+                // Fallback to original method
+                doc.save(fileName + '.pdf');
+                alert('File PDF rekap absen berhasil diunduh!');
+            }
+        }
+
+
+
+        function sendEmail(bulan, tahun) {
+            const monthNames = ['', 'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+                              'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+            
+            // Create email content with exact format requested
+            let subject = 'Laporan Rekap Absen Siswa - ';
+            let body = '';
+            
+            // Header based on selection
+            if (bulan === 'all' && tahun === 'all') {
+                subject += 'Semua Data';
+                body += `📊 LAPORAN REKAP SEMUA DATA\n`;
+            } else if (bulan === 'all') {
+                subject += `Semua Bulan ${tahun}`;
+                body += `📊 LAPORAN REKAP SEMUA BULAN ${tahun}\n`;
+            } else if (tahun === 'all') {
+                subject += `${monthNames[parseInt(bulan)]} Semua Tahun`;
+                body += `📊 LAPORAN REKAP ${monthNames[parseInt(bulan)].toUpperCase()} SEMUA TAHUN\n`;
+            } else {
+                subject += `${monthNames[parseInt(bulan)]} ${tahun}`;
+                body += `📊 LAPORAN BULAN ${monthNames[parseInt(bulan)].toUpperCase()} ${tahun}\n`;
+            }
+            
+            body += `\n🏫 NAMA SEKOLAH : ${document.getElementById('namaSekolah').value || '[ISI NAMA SEKOLAH]'}\n`;
+            body += `📚 KELAS        : ${document.getElementById('kelas').value || '[ISI KELAS]'}\n`;
+            body += `👨‍🏫 WALI KELAS   : ${document.getElementById('waliKelas').value || '[ISI NAMA WALI KELAS]'}\n`;
+            body += `📅 TANGGAL CETAK : ${new Date().toLocaleDateString('id-ID')}\n`;
+            body += `═══════════════════════════════════════\n\n`;
+            
+            // Period section
+            if (bulan === 'all' && tahun === 'all') {
+                body += `📋 PERIODE: SEMUA DATA\n\n`;
+            } else if (bulan === 'all') {
+                body += `📋 PERIODE: SEMUA BULAN ${tahun}\n\n`;
+            } else if (tahun === 'all') {
+                body += `📋 PERIODE: ${monthNames[parseInt(bulan)]} SEMUA TAHUN\n\n`;
+            } else {
+                body += `📋 PERIODE: ${monthNames[parseInt(bulan)]} ${tahun}\n\n`;
+            }
+            
+            // Student data in requested format
+            let totalHadir = 0, totalSakit = 0, totalIzin = 0, totalAlpa = 0;
+            
+            students.forEach((student, index) => {
+                let hadir = 0, sakit = 0, izin = 0, alpa = 0;
+                
+                // Count attendance for each student based on selected period
+                Object.keys(attendance).forEach(dateStr => {
+                    const date = new Date(dateStr);
+                    const attendanceData = attendance[dateStr];
+                    
+                    // Check if date matches selected month/year filter
+                    let includeDate = false;
+                    
+                    if (bulan === 'all' && tahun === 'all') {
+                        includeDate = true;
+                    } else if (bulan === 'all' && tahun !== 'all') {
+                        includeDate = date.getFullYear() === parseInt(tahun);
+                    } else if (bulan !== 'all' && tahun === 'all') {
+                        includeDate = (date.getMonth() + 1) === parseInt(bulan);
+                    } else {
+                        includeDate = date.getFullYear() === parseInt(tahun) && (date.getMonth() + 1) === parseInt(bulan);
+                    }
+                    
+                    if (includeDate && attendanceData[student.id]) {
+                        const status = attendanceData[student.id];
+                        switch (status) {
+                            case 'HADIR': hadir++; break;
+                            case 'SAKIT': sakit++; break;
+                            case 'IZIN': izin++; break;
+                            case 'ALPA': alpa++; break;
+                        }
+                    }
+                });
+                
+                totalHadir += hadir;
+                totalSakit += sakit;
+                totalIzin += izin;
+                totalAlpa += alpa;
+                
+                const totalKehadiran = hadir + sakit + izin + alpa;
+                const persentase = totalKehadiran > 0 ? ((hadir / totalKehadiran) * 100).toFixed(1) : '0.0';
+                
+                body += `${index + 1}. ${student.nama}\n`;
+                body += `   ✅ HADIR : ${hadir}\n`;
+                body += `   🤒 SAKIT : ${sakit}\n`;
+                body += `   📝 IZIN  : ${izin}\n`;
+                body += `   ❌ ALPA  : ${alpa}\n`;
+                body += `   📊 PERSENTASE : ${persentase}%\n\n`;
+            });
+            
+            // Add summary
+            body += `═══════════════════════════════════════\n`;
+            body += `📈 RINGKASAN KESELURUHAN:\n`;
+            body += `✅ Total Hadir : ${totalHadir}\n`;
+            body += `🤒 Total Sakit : ${totalSakit}\n`;
+            body += `📝 Total Izin  : ${totalIzin}\n`;
+            body += `❌ Total Alpa  : ${totalAlpa}\n`;
+            body += `👥 Total Siswa : ${students.length}\n\n`;
+            
+            body += `📱 Laporan ini dibuat otomatis oleh Sistem Absen Siswa\n`;
+            body += `🕐 Dicetak pada: ${new Date().toLocaleString('id-ID')}`;
+            
+            // Try to open email client automatically
+            try {
+                const mailtoLink = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+                
+                // Create a temporary link and click it
+                const tempLink = document.createElement('a');
+                tempLink.href = mailtoLink;
+                tempLink.style.display = 'none';
+                document.body.appendChild(tempLink);
+                tempLink.click();
+                document.body.removeChild(tempLink);
+                
+                // Show success message
+                setTimeout(() => {
+                    alert('✅ Aplikasi email telah dibuka!\n\n📧 Silakan:\n1. Masukkan alamat email tujuan\n2. Periksa isi laporan\n3. Klik kirim\n\n💡 Jika email tidak terbuka, salin teks laporan secara manual.');
+                }, 500);
+                
+            } catch (error) {
+                // Fallback: show the content in a modal or alert
+                alert('⚠️ Tidak dapat membuka aplikasi email otomatis.\n\nSilakan salin teks berikut dan kirim manual:\n\n' + subject + '\n\n' + body);
+            }
+        }
+
+        function sendWhatsApp(bulan, tahun) {
+            const monthNames = ['', 'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+                              'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+            
+            // Create WhatsApp message with exact format requested
+            let message = '';
+            
+            // Header based on selection
+            if (bulan === 'all' && tahun === 'all') {
+                message += `*📊 LAPORAN REKAP SEMUA DATA*\n`;
+            } else if (bulan === 'all') {
+                message += `*📊 LAPORAN REKAP SEMUA BULAN ${tahun}*\n`;
+            } else if (tahun === 'all') {
+                message += `*📊 LAPORAN REKAP ${monthNames[parseInt(bulan)].toUpperCase()} SEMUA TAHUN*\n`;
+            } else {
+                message += `*📊 LAPORAN BULAN ${monthNames[parseInt(bulan)].toUpperCase()} ${tahun}*\n`;
+            }
+            
+            message += `\n🏫 *NAMA SEKOLAH :* ${document.getElementById('namaSekolah').value || '[ISI NAMA SEKOLAH]'}\n`;
+            message += `📚 *KELAS        :* ${document.getElementById('kelas').value || '[ISI KELAS]'}\n`;
+            message += `👨‍🏫 *WALI KELAS   :* ${document.getElementById('waliKelas').value || '[ISI NAMA WALI KELAS]'}\n`;
+            message += `📅 *TANGGAL CETAK :* ${new Date().toLocaleDateString('id-ID')}\n`;
+            message += `═══════════════════════════════════════\n\n`;
+            
+            // Period section
+            if (bulan === 'all' && tahun === 'all') {
+                message += `📋 *PERIODE: SEMUA DATA*\n\n`;
+            } else if (bulan === 'all') {
+                message += `📋 *PERIODE: SEMUA BULAN ${tahun}*\n\n`;
+            } else if (tahun === 'all') {
+                message += `📋 *PERIODE: ${monthNames[parseInt(bulan)]} SEMUA TAHUN*\n\n`;
+            } else {
+                message += `📋 *PERIODE: ${monthNames[parseInt(bulan)]} ${tahun}*\n\n`;
+            }
+            
+            // Show first 15 students to avoid message being too long
+            const maxStudents = Math.min(15, students.length);
+            let totalHadir = 0, totalSakit = 0, totalIzin = 0, totalAlpa = 0;
+            
+            students.slice(0, maxStudents).forEach((student, index) => {
+                let hadir = 0, sakit = 0, izin = 0, alpa = 0;
+                
+                // Count attendance for each student based on selected period
+                Object.keys(attendance).forEach(dateStr => {
+                    const date = new Date(dateStr);
+                    const attendanceData = attendance[dateStr];
+                    
+                    // Check if date matches selected month/year filter
+                    let includeDate = false;
+                    
+                    if (bulan === 'all' && tahun === 'all') {
+                        includeDate = true;
+                    } else if (bulan === 'all' && tahun !== 'all') {
+                        includeDate = date.getFullYear() === parseInt(tahun);
+                    } else if (bulan !== 'all' && tahun === 'all') {
+                        includeDate = (date.getMonth() + 1) === parseInt(bulan);
+                    } else {
+                        includeDate = date.getFullYear() === parseInt(tahun) && (date.getMonth() + 1) === parseInt(bulan);
+                    }
+                    
+                    if (includeDate && attendanceData[student.id]) {
+                        const status = attendanceData[student.id];
+                        switch (status) {
+                            case 'HADIR': hadir++; break;
+                            case 'SAKIT': sakit++; break;
+                            case 'IZIN': izin++; break;
+                            case 'ALPA': alpa++; break;
+                        }
+                    }
+                });
+                
+                totalHadir += hadir;
+                totalSakit += sakit;
+                totalIzin += izin;
+                totalAlpa += alpa;
+                
+                const totalKehadiran = hadir + sakit + izin + alpa;
+                const persentase = totalKehadiran > 0 ? ((hadir / totalKehadiran) * 100).toFixed(1) : '0.0';
+                
+                message += `*${index + 1}. ${student.nama}*\n`;
+                message += `   ✅ HADIR : ${hadir}\n`;
+                message += `   🤒 SAKIT : ${sakit}\n`;
+                message += `   📝 IZIN  : ${izin}\n`;
+                message += `   ❌ ALPA  : ${alpa}\n`;
+                message += `   📊 PERSENTASE : ${persentase}%\n\n`;
+            });
+            
+            if (students.length > maxStudents) {
+                message += `... dan *${students.length - maxStudents} siswa lainnya*\n\n`;
+            }
+            
+            // Add summary for displayed students
+            message += `═══════════════════════════════════════\n`;
+            message += `📈 *RINGKASAN ${maxStudents} SISWA TERATAS:*\n`;
+            message += `✅ Total Hadir : ${totalHadir}\n`;
+            message += `🤒 Total Sakit : ${totalSakit}\n`;
+            message += `📝 Total Izin  : ${totalIzin}\n`;
+            message += `❌ Total Alpa  : ${totalAlpa}\n`;
+            message += `👥 Total Siswa : ${students.length}\n\n`;
+            
+            message += `📱 _Laporan ini dibuat otomatis oleh Sistem Absen Siswa_\n`;
+            message += `🕐 _Dicetak pada: ${new Date().toLocaleString('id-ID')}_`;
+            
+            // Try to open WhatsApp automatically
+            try {
+                // For mobile devices, try to open WhatsApp app directly
+                const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+                
+                let whatsappUrl;
+                if (isMobile) {
+                    // Try to open WhatsApp app on mobile
+                    whatsappUrl = `whatsapp://send?text=${encodeURIComponent(message)}`;
+                } else {
+                    // Use WhatsApp Web for desktop
+                    whatsappUrl = `https://web.whatsapp.com/send?text=${encodeURIComponent(message)}`;
+                }
+                
+                // Create a temporary link and click it
+                const tempLink = document.createElement('a');
+                tempLink.href = whatsappUrl;
+                tempLink.target = '_blank';
+                tempLink.style.display = 'none';
+                document.body.appendChild(tempLink);
+                tempLink.click();
+                document.body.removeChild(tempLink);
+                
+                // Show success message
+                setTimeout(() => {
+                    if (isMobile) {
+                        alert('✅ Aplikasi WhatsApp telah dibuka!\n\n📱 Silakan:\n1. Pilih kontak tujuan\n2. Periksa isi laporan\n3. Klik kirim\n\n💡 Jika WhatsApp tidak terbuka, pastikan aplikasi sudah terinstall.');
+                    } else {
+                        alert('✅ WhatsApp Web telah dibuka!\n\n💻 Silakan:\n1. Scan QR code jika belum login\n2. Pilih kontak tujuan\n3. Periksa isi laporan\n4. Klik kirim\n\n💡 Pastikan WhatsApp Web dapat diakses di browser Anda.');
+                    }
+                }, 1000);
+                
+            } catch (error) {
+                // Fallback: try alternative method
+                try {
+                    const fallbackUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
+                    window.open(fallbackUrl, '_blank');
+                    
+                    setTimeout(() => {
+                        alert('✅ WhatsApp telah dibuka di browser!\n\n🌐 Silakan:\n1. Pilih kontak tujuan\n2. Periksa isi laporan\n3. Klik kirim');
+                    }, 500);
+                    
+                } catch (fallbackError) {
+                    // Final fallback: show the content
+                    alert('⚠️ Tidak dapat membuka WhatsApp otomatis.\n\nSilakan salin teks berikut dan kirim manual:\n\n' + message);
+                }
+            }
+        }
+
+        // Data persistence functions are now enhanced above with autosave functionality
+
+        // File upload functions
+        let uploadData = [];
+
+        function handleFileSelect(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const fileName = file.name.toLowerCase();
+            
+            if (fileName.endsWith('.xlsx')) {
+                readExcelFile(file);
+            } else {
+                alert('Format file tidak didukung. Gunakan file Excel (.xlsx).');
+                event.target.value = '';
+                return;
+            }
+        }
+
+        function readExcelFile(file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, { type: 'array' });
+                    
+                    // Get first worksheet
+                    const firstSheetName = workbook.SheetNames[0];
+                    const worksheet = workbook.Sheets[firstSheetName];
+                    
+                    // Convert to JSON
+                    const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+                    
+                    parseExcelData(jsonData);
+                } catch (error) {
+                    alert('Error membaca file Excel: ' + error.message);
+                    document.getElementById('fileInput').value = '';
+                }
+            };
+            reader.readAsArrayBuffer(file);
+        }
+
+        function parseExcelData(data) {
+            uploadData = [];
+            
+            let startIndex = 0;
+            
+            // Check if first row is header
+            if (data.length > 0) {
+                const firstRow = data[0];
+                const isHeader = firstRow.some(cell => 
+                    cell && cell.toString().toLowerCase().includes('nama') || 
+                    cell && cell.toString().toLowerCase().includes('nis') || 
+                    cell && cell.toString().toLowerCase().includes('kelamin')
+                );
+                
+                if (isHeader) {
+                    startIndex = 1;
+                }
+            }
+            
+            for (let i = startIndex; i < data.length; i++) {
+                const row = data[i];
+                
+                if (row && row.length >= 3 && row[0] && row[1] && row[2]) {
+                    let jenisKelamin = row[2].toString().toUpperCase().trim();
+                    
+                    // Normalize gender values
+                    if (jenisKelamin === 'L' || jenisKelamin === 'LAKI' || jenisKelamin === 'LAKI-LAKI') {
+                        jenisKelamin = 'LAKI-LAKI';
+                    } else if (jenisKelamin === 'P' || jenisKelamin === 'PEREMPUAN') {
+                        jenisKelamin = 'PEREMPUAN';
+                    } else {
+                        continue; // Skip invalid gender
+                    }
+                    
+                    uploadData.push({
+                        nama: row[0].toString().trim(),
+                        nis: row[1].toString().trim(),
+                        jenisKelamin: jenisKelamin
+                    });
+                }
+            }
+            
+            showPreview();
+        }
+
+        function showPreview() {
+            if (uploadData.length === 0) {
+                document.getElementById('prosesUpload').disabled = true;
+                alert('Tidak ada data valid yang ditemukan dalam file!');
+            } else {
+                document.getElementById('prosesUpload').disabled = false;
+                // Simple alert showing count only
+                alert(`File berhasil dibaca! Ditemukan ${uploadData.length} siswa.`);
+            }
+        }
+
+        function processUpload() {
+            if (uploadData.length === 0) return;
+            
+            // Get selected upload mode
+            const uploadMode = document.querySelector('input[name="uploadMode"]:checked').value;
+            
+            let addedCount = 0;
+            let skippedCount = 0;
+            let replacedCount = 0;
+            
+            if (uploadMode === 'replace') {
+                // Replace mode: clear all existing data
+                const oldCount = students.length;
+                students = [];
+                
+                // Add all new students
+                uploadData.forEach(newStudent => {
+                    const student = {
+                        id: Date.now() + Math.random(),
+                        nama: newStudent.nama,
+                        nis: newStudent.nis,
+                        jenisKelamin: newStudent.jenisKelamin
+                    };
+                    students.push(student);
+                    addedCount++;
+                });
+                
+                replacedCount = oldCount;
+                
+            } else {
+                // Add mode: add to existing data
+                uploadData.forEach(newStudent => {
+                    // Check for duplicates
+                    const isDuplicate = students.some(student => 
+                        student.nama.toLowerCase() === newStudent.nama.toLowerCase() || 
+                        student.nis === newStudent.nis
+                    );
+                    
+                    if (!isDuplicate) {
+                        const student = {
+                            id: Date.now() + Math.random(),
+                            nama: newStudent.nama,
+                            nis: newStudent.nis,
+                            jenisKelamin: newStudent.jenisKelamin
+                        };
+                        students.push(student);
+                        addedCount++;
+                    } else {
+                        skippedCount++;
+                    }
+                });
+            }
+            
+            // Sort students alphabetically
+            students.sort((a, b) => a.nama.localeCompare(b.nama));
+            
+            saveData();
+            updateStudentCount();
+            renderStudentTable();
+            
+            // Close modal and show result
+            document.getElementById('modalUpload').classList.add('hidden');
+            document.getElementById('fileInput').value = '';
+            document.getElementById('prosesUpload').disabled = true;
+            
+            let message = `Upload selesai!\n\n`;
+            
+            if (uploadMode === 'replace') {
+                message += `🔄 Data lama dihapus: ${replacedCount} siswa\n`;
+                message += `✅ Data baru ditambahkan: ${addedCount} siswa`;
+            } else {
+                message += `✅ Berhasil ditambahkan: ${addedCount} siswa\n`;
+                if (skippedCount > 0) {
+                    message += `⚠️ Dilewati (duplikat): ${skippedCount} siswa`;
+                }
+            }
+            
+            alert(message);
+        }
+
+        // Setup autosave functionality
+        function setupAutoSave() {
+            // Auto-save every 30 seconds
+            setInterval(() => {
+                showAutosaveAnimation('saving');
+                setTimeout(() => {
+                    const success = saveData();
+                    showAutosaveAnimation(success ? 'success' : 'error');
+                    console.log('🔄 Data otomatis tersimpan:', new Date().toLocaleTimeString('id-ID'));
+                }, 500);
+            }, 30000);
+            
+            // Save when page is about to close/refresh
+            window.addEventListener('beforeunload', function(e) {
+                showAutosaveAnimation('saving');
+                saveData();
+                console.log('💾 Data tersimpan sebelum halaman ditutup');
+            });
+            
+            // Save when page loses focus (user switches tab/app)
+            window.addEventListener('blur', function() {
+                showAutosaveAnimation('saving');
+                setTimeout(() => {
+                    const success = saveData();
+                    showAutosaveAnimation(success ? 'success' : 'error');
+                    console.log('💾 Data tersimpan saat aplikasi kehilangan fokus');
+                }, 200);
+            });
+            
+            // Save when page gains focus (user returns to tab/app)
+            window.addEventListener('focus', function() {
+                loadData();
+                console.log('🔄 Data dimuat ulang saat aplikasi mendapat fokus');
+                
+                // Refresh current view
+                const activeTab = document.querySelector('.tab-btn.bg-teal');
+                if (activeTab) {
+                    const tabName = activeTab.dataset.tab;
+                    if (tabName === 'data-siswa') {
+                        renderStudentTable();
+                        updateStudentCount();
+                    } else if (tabName === 'absen') {
+                        renderAbsenTable();
+                    } else if (tabName === 'riwayat') {
+                        const bulan = parseInt(document.getElementById('bulanRiwayat').value);
+                        const tahun = parseInt(document.getElementById('tahunRiwayat').value);
+                        renderRiwayatTable(bulan, tahun);
+                    } else if (tabName === 'rekap') {
+                        const bulan = document.getElementById('bulanRekap').value;
+                        const tahun = document.getElementById('tahunRekap').value;
+                        renderRekapTable(bulan, tahun);
+                    }
+                }
+            });
+            
+            // Save when visibility changes (mobile app switching)
+            document.addEventListener('visibilitychange', function() {
+                if (document.hidden) {
+                    showAutosaveAnimation('saving');
+                    setTimeout(() => {
+                        const success = saveData();
+                        console.log('💾 Data tersimpan saat aplikasi tersembunyi');
+                    }, 100);
+                } else {
+                    loadData();
+                    showAutosaveAnimation('success');
+                    console.log('🔄 Data dimuat ulang saat aplikasi terlihat kembali');
+                }
+            });
+            
+            // Enhanced save for form inputs with debouncing
+            let saveTimeout;
+            function debouncedSave() {
+                clearTimeout(saveTimeout);
+                showAutosaveAnimation('saving');
+                saveTimeout = setTimeout(() => {
+                    const success = saveData();
+                    showAutosaveAnimation(success ? 'success' : 'error');
+                    console.log('💾 Data form tersimpan otomatis');
+                }, 1000); // Save 1 second after user stops typing
+            }
+            
+            // Auto-save school info when changed with debouncing
+            ['namaSekolah', 'kelas', 'waliKelas'].forEach(id => {
+                const element = document.getElementById(id);
+                element.addEventListener('input', debouncedSave);
+                element.addEventListener('change', () => {
+                    showAutosaveAnimation('saving');
+                    setTimeout(() => {
+                        const success = saveData();
+                        showAutosaveAnimation(success ? 'success' : 'error');
+                    }, 200);
+                });
+            });
+            
+            // Show autosave status in console
+            console.log('✅ AUTOSAVE AKTIF - Data akan tersimpan otomatis setiap 30 detik dan saat aplikasi ditutup/refresh');
+        }
+
+        // Autosave animation function
+        function showAutosaveAnimation(type) {
+            const statusElement = document.getElementById('autosaveStatus');
+            if (!statusElement) return;
+            
+            // Remove all animation classes
+            statusElement.classList.remove('autosave-pulse', 'autosave-saving', 'autosave-success');
+            
+            switch (type) {
+                case 'saving':
+                    statusElement.innerHTML = '⏳';
+                    statusElement.classList.add('autosave-saving');
+                    break;
+                    
+                case 'success':
+                    statusElement.innerHTML = '✅';
+                    statusElement.classList.add('autosave-success');
+                    
+                    // Return to normal state after animation
+                    setTimeout(() => {
+                        statusElement.innerHTML = '💾 AUTO';
+                        statusElement.classList.remove('autosave-success');
+                        statusElement.classList.add('autosave-pulse');
+                    }, 2000);
+                    break;
+                    
+                case 'error':
+                    statusElement.innerHTML = '❌';
+                    statusElement.style.backgroundColor = '#ef4444';
+                    
+                    // Return to normal state after showing error
+                    setTimeout(() => {
+                        statusElement.innerHTML = '💾 AUTO';
+                        statusElement.style.backgroundColor = '';
+                        statusElement.classList.add('autosave-pulse');
+                    }, 3000);
+                    break;
+                    
+                default:
+                    statusElement.innerHTML = '💾 AUTO';
+                    statusElement.classList.add('autosave-pulse');
+                    break;
+            }
+        }
+
+        // Enhanced save function with error handling
+        function saveData() {
+            try {
+                const data = {
+                    students: students,
+                    attendance: attendance,
+                    holidays: Array.from(holidays),
+                    namaSekolah: document.getElementById('namaSekolah').value,
+                    kelas: document.getElementById('kelas').value,
+                    waliKelas: document.getElementById('waliKelas').value,
+                    lastSaved: new Date().toISOString(),
+                    version: '2.0' // Version for future compatibility
+                };
+                
+                localStorage.setItem('absenSiswaData', JSON.stringify(data));
+                
+                // Also save to sessionStorage as backup
+                sessionStorage.setItem('absenSiswaBackup', JSON.stringify(data));
+                
+                return true;
+            } catch (error) {
+                console.error('❌ Error menyimpan data:', error);
+                
+                // Try to clear some space and retry
+                try {
+                    // Clear old backup data
+                    localStorage.removeItem('absenSiswaBackup_old');
+                    sessionStorage.removeItem('absenSiswaBackup_old');
+                    
+                    // Retry save
+                    localStorage.setItem('absenSiswaData', JSON.stringify(data));
+                    console.log('✅ Data berhasil disimpan setelah pembersihan');
+                    return true;
+                } catch (retryError) {
+                    console.error('❌ Gagal menyimpan data setelah retry:', retryError);
+                    alert('⚠️ Peringatan: Data tidak dapat disimpan otomatis. Pastikan browser memiliki ruang penyimpanan yang cukup.');
+                    return false;
+                }
+            }
+        }
+
+        // Enhanced load function with backup recovery
+        function loadData() {
+            try {
+                let savedData = localStorage.getItem('absenSiswaData');
+                
+                // If main data not found, try backup
+                if (!savedData) {
+                    savedData = sessionStorage.getItem('absenSiswaBackup');
+                    if (savedData) {
+                        console.log('🔄 Data dimuat dari backup sessionStorage');
+                    }
+                }
+                
+                if (savedData) {
+                    const data = JSON.parse(savedData);
+                    
+                    // Validate data structure
+                    if (data && typeof data === 'object') {
+                        students = data.students || [];
+                        attendance = data.attendance || {};
+                        holidays = new Set(data.holidays || []);
+                        
+                        if (data.namaSekolah) document.getElementById('namaSekolah').value = data.namaSekolah;
+                        if (data.kelas) document.getElementById('kelas').value = data.kelas;
+                        if (data.waliKelas) document.getElementById('waliKelas').value = data.waliKelas;
+                        
+                        updateStudentCount();
+                        
+                        if (data.lastSaved) {
+                            const lastSaved = new Date(data.lastSaved);
+                            console.log('✅ Data berhasil dimuat. Terakhir disimpan:', lastSaved.toLocaleString('id-ID'));
+                        }
+                        
+                        return true;
+                    }
+                }
+                
+                console.log('ℹ️ Tidak ada data tersimpan, memulai dengan data kosong');
+                return false;
+                
+            } catch (error) {
+                console.error('❌ Error memuat data:', error);
+                
+                // Try to load from backup
+                try {
+                    const backupData = sessionStorage.getItem('absenSiswaBackup');
+                    if (backupData) {
+                        const data = JSON.parse(backupData);
+                        students = data.students || [];
+                        attendance = data.attendance || {};
+                        holidays = new Set(data.holidays || []);
+                        
+                        console.log('🔄 Data berhasil dimuat dari backup');
+                        updateStudentCount();
+                        return true;
+                    }
+                } catch (backupError) {
+                    console.error('❌ Error memuat backup:', backupError);
+                }
+                
+                // Reset to empty state if all fails
+                students = [];
+                attendance = {};
+                holidays = new Set();
+                updateStudentCount();
+                
+                alert('⚠️ Peringatan: Terjadi error saat memuat data. Aplikasi dimulai dengan data kosong.');
+                return false;
+            }
+        }
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'97d0176e362eaa81',t:'MTc1NzUxOTUzNi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
